@@ -1,0 +1,70 @@
+---
+title: "Portugal Market Analysis"
+output: 
+  flexdashboard::flex_dashboard:
+    source_code: embed
+    orientation: columns
+    vertical_layout: fill
+    theme: simplex
+editor_options: 
+  chunk_output_type: console
+runtime: shiny
+---
+<!-- theme alternatives: "cerulean",  "journal", "readable", "simplex", "united", "yeti" -->
+
+```{r SETUP, message=FALSE, include=FALSE}
+#GENERAL CODE CHUNK SETUP
+knitr::opts_chunk$set(echo = FALSE, message=FALSE)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#PACKAGE INSTALLATION AND LOADING
+#-the essential packages required to load the document are markdown, knitr, flexdashboard and pacman.
+#-the following code checks for their installation, installing them if required, and proceeds
+#-to install/load other necessary packages.
+
+if(!require("markdown")) install.packages("markdown")
+if(!require("knitr")) install.packages("knitr")
+if(!require("flexdashboard")) install.packages("flexdashboard")
+if(!require("pacman")) install.packages("pacman") 
+#--pacman function essential for loading and installing (if not already installed) packages together
+
+pacman::p_load(
+  knitr,           #--essential for rmarkdown document modification
+  tidyverse,       #--contains ggplot2, readr, tibble, dplyr, magrittr
+  reactable,       #--for creation of large tables
+  janitor,         #--manipulation, summarisation of messy data, plus duplicate detection
+  inspectdf,       #--dataframe inspection, relative to value (used in dataset analysis)
+  highcharter,     #--interactive data visualisation
+  htmltools,       #--website page options (zoom, scrolling)
+  collapsibleTree, #--for happiness factor collapsible tree
+  broom,           #--needed to convert linear model for interpolation line into dataframe
+  dygraphs,        #--package for time series model creation
+  xts,             #--data format required by dygraphs
+  shiny            #--"runtime: shiny" in JMAL header already loads the library, useful for debugging w/o knitting
+)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+filler
+```{r}
+2+2
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+filler
+```{r}
+1+3
+```
+
+### Chart C
+filler
+```{r}
+4+4
+```
+
