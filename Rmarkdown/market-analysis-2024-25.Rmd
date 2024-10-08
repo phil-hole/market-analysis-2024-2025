@@ -101,6 +101,8 @@ dsets <-
 #-method flexible to increases, decreases or variations in order to dataset directory.
 ```
 
+
+
 <!-- INTRODUCTION PAGE -->
 
 # Introduction
@@ -109,19 +111,19 @@ dsets <-
 
 ## Definitions and Graph {data-width="400"}
 
-### **Definitions**
+### **Research Question and Definitions**
 
+Fruit Snacks, Snack Bars, Sweet Biscuits in Portugal and the strategy of *Vieira de Castro & Filhos Lda.* in that market.
 
 - What is a snack?
-  - "A small meal or amount of food, usually eaten in a hurry" (definition from Oxford Dictionary)
-- What types of snack exist?
+  - "A small meal or amount of food, usually eaten in a hurry." (definition from Oxford Dictionary)
+- What types of snack do we consider?
   - Fruit Snacks (dried fruit, processed fruit snacks).
-  - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack bars).
-  - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain biscuits, wafers).
+  - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack     bars).
+  - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain        biscuits, wafers).
 - How do we outline the snack market?
-  - Our market consists of the production and retail sales of dried fruit, processed fruit snacks,     cereal bars, energy bars, fruit and nut bars, other snack bars, chocolate coated biscuits,        cookies, filled biscuits, plain biscuits, wafers.
-  - The market is valued according to retail selling price (RSP) and includes any applicable 
-    taxes (definition from Euromonitor).
+  - The Portuguese market consists of the production and retail sales of dried        fruit, processed fruit snacks, cereal bars, energy bars, fruit and nut bars,      other snack bars, chocolate coated biscuits, cookies, filled biscuits, plain      biscuits, wafers.
+  - The market is valued according to retail selling price (RSP) and includes any     applicable taxes (definition from Euromonitor).
 
 <!-- INDEX SECTION -->
 
@@ -129,8 +131,8 @@ dsets <-
 ```{r REPORT FACTOR WEB}
 Index <- 
   data.frame(
-    parent = c(rep("Socio-Demographic Analysis", 4), rep("Economic Analysis", 4), rep("Demand and              Supply", 3)),
-    child = c("Population", "Health Factors", "Parallel with Italy and Spain", "Wealth                        Distribution", "General Economic Overview", "Snack Market", "Vieira de Castro & Filhos             Lda.", "Main Market Actors", "Supply and Demand Fluctuations", "Hypotheticals tied to             the good", "Effect of Externalities")
+    parent = c(rep("Socio-Demographic Analysis", 4), rep("Economic Analysis", 4),                rep("Demand and Supply", 3)),
+    child = c("Population", "Health Factors", "Parallel with Italy and Spain",                  "Wealth Distribution", "General Economic Overview", "Snack Market",               "Vieira de Castro & Filhos Lda.", "Main Market Actors", "Supply and                Demand Fluctuations", "Hypotheticals tied to the good", "Effect of                Externalities")
   )
 
 collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE, 
@@ -150,13 +152,16 @@ collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE,
 
 ##### **Premises to Inference**
 
-The purpose of this section is to state the principles behind our statistical inference. In order to treat the data as objectively as possible, we followed a set of behaviours and procedures aimed at limiting bias and presenting information through useful, not deceiving representations.
+The purpose of this section is to state the principles behind our statistical inference. In order to treat the data as objectively as possible, specific behaviours and procedures were followed in regards to the making of the report. Our aim is limiting bias and presenting information through useful representations.
 
-The first necessity when analysing data dependent on multiple variables is to standardise it in function of a representative value. The main practices followed were:
+In order to achieve reliable conclusions, we must conform to a rigid information selection process, in accordance with the following principles:
 
--   filler
--   filler
--   filler
+-   Pertaining to quantitative information and assessing qualitative sources with     care.
+-   Thoroughly checking the validity, completeness and accessibility of the           information gathered online.
+  -   Since our data is primarily secondary, we ensure that the external sources        from which we collect data are reliable.
+  -   Information maily gathered from Eurostat (Passport data) and OurWorldinData.
+
+Additionally, to avoid indirect manipulation of the data, much care was placed in choosing the kinds of graphical representation added to the report. Moreso, our analysis was founded upon standardised values so as to guarantee truthful trends acting in function of individual variables. 
 
 <!-- CHALLENGES FACED SUBSECTION -->
 
@@ -164,9 +169,13 @@ The first necessity when analysing data dependent on multiple variables is to st
 
 ##### **Challenges Faced**
 
-FILLER TEXT
+Throughout the analysis, we incurred in a series of problems that complicated our operations. It is to be expected that a research on a topic as expansive as a market leads to fragmented conclusions or unsatisfactory outcomes. Some issues  faced were:
 
-<!-- CHALLENGES FACED SUBSECTION -->
+-   Lack of public data for the company of study.
+-   Discordant data between sources.
+-   Lack of confidence in some data correlation.
+
+<!-- OVERCOMING CHALLENGES SUBSECTION -->
 
 ####
 
@@ -174,13 +183,20 @@ FILLER TEXT
 
 FILLER TEXT
 
+-   contacting the company
+-   brand analysis
+-   cross-referencing sources
+
+
+
+
 <!-- SOCIO-DEMOGRAPHICS PAGE -->
 
 # Socio-Demographic Factors
 
 <!-- POPULATION SECTION -->
 
-## Population {.tabset .tabset-fade data-width="700"}
+## Population {.tabset .tabset-fade data-width="550"}
 
 <!-- TAB 1 DEMOGRAPHICS -->
 
@@ -188,11 +204,19 @@ FILLER TEXT
 
 filler
 
+```{r PORTUGAL DEMOGRAPHICS}
+5+5
+```
+
 <!-- TAB 2 HEALTH -->
 
 ### **Portuguese General Health**
 
 filler
+
+```{r PORTUGAL HEALTH}
+7*2
+```
 
 <!-- TAB 3 WEALTH -->
 
@@ -200,51 +224,20 @@ filler
 
 filler
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{r PORTUGAL WEALTH}
+6+6
+```
 
 <!-- PARALLELS SECTION -->
 
-## Parallels with Italy and Spain {data-width = "400"}
-
-<!-- DEMOGRAPHICS GRAPHS -->
+## Parallels with Italy and Spain {data-width = "450"}
 
 ###
 
-```{r}
+filler
+
+```{ShinyUI PORTUGAL SPAIN ITALY PARALLELS r}
 2+2
 ```
-
-<!-- HEALTH GRAPHS -->
-
-###
-
-```{r}
-3+3
-```
-
-<!-- WEALTH GRAPHS -->
-
-###
-
-```{r}
-4+4
-```
-
 
 
