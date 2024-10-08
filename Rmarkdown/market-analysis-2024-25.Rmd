@@ -79,7 +79,7 @@ scplot_custom <- function(x){
       lineWidth=5,
       labels=list(format="{value}%"), 
       lineColor="#ecf0f1") %>% 
-    hc_plotOptions(., scatter=list(color="#18bc9c"))
+    hc_plotOptions(., scatter=list(color="#db240c"))
   }
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
@@ -103,30 +103,148 @@ dsets <-
 
 <!-- INTRODUCTION PAGE -->
 
-# **Introduction**
+# Introduction
 
-## Definitions and Graph {data-width="390" data-height="800"}
+<!-- DEFINITIONS SECTION -->
+
+## Definitions and Graph {data-width="400"}
 
 ### **Definitions**
-Definitions:
--Snack Market
--Portugal
--Cristiano Ronaldo effect
 
+
+- What is a snack?
+  - "A small meal or amount of food, usually eaten in a hurry" (definition from Oxford Dictionary)
+- What types of snack exist?
+  - Fruit Snacks (dried fruit, processed fruit snacks).
+  - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack bars).
+  - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain biscuits, wafers).
+- How do we outline the snack market?
+  - Our market consists of the production and retail sales of dried fruit, processed fruit snacks,     cereal bars, energy bars, fruit and nut bars, other snack bars, chocolate coated biscuits,        cookies, filled biscuits, plain biscuits, wafers.
+  - The market is valued according to retail selling price (RSP) and includes any applicable 
+    taxes (definition from Euromonitor).
+
+<!-- INDEX SECTION -->
 
 ### **Index**
+```{r REPORT FACTOR WEB}
+Index <- 
+  data.frame(
+    parent = c(rep("Socio-Demographic Analysis", 4), rep("Economic Analysis", 4), rep("Demand and              Supply", 3)),
+    child = c("Population", "Health Factors", "Parallel with Italy and Spain", "Wealth                        Distribution", "General Economic Overview", "Snack Market", "Vieira de Castro & Filhos             Lda.", "Main Market Actors", "Supply and Demand Fluctuations", "Hypotheticals tied to             the good", "Effect of Externalities")
+  )
+
+collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE, 
+                width = 600, height = NULL, tooltip = FALSE, fontSize= 10, fill= "#db240c")
+
+```
+
+<!-- ANALYSIS METHODS SECTION -->
+
+## Analysis Methods {data-width="600"}
+
+<!-- PREMISES TO INFERENCE SUBSECTION -->
+
+###
+
+####
+
+##### **Premises to Inference**
+
+The purpose of this section is to state the principles behind our statistical inference. In order to treat the data as objectively as possible, we followed a set of behaviours and procedures aimed at limiting bias and presenting information through useful, not deceiving representations.
+
+The first necessity when analysing data dependent on multiple variables is to standardise it in function of a representative value. The main practices followed were:
+
+-   filler
+-   filler
+-   filler
+
+<!-- CHALLENGES FACED SUBSECTION -->
+
+####
+
+##### **Challenges Faced**
+
+FILLER TEXT
+
+<!-- CHALLENGES FACED SUBSECTION -->
+
+####
+
+##### **Overcoming Challenges**
+
+FILLER TEXT
+
+<!-- SOCIO-DEMOGRAPHICS PAGE -->
+
+# Socio-Demographic Factors
+
+<!-- POPULATION SECTION -->
+
+## Population {.tabset .tabset-fade data-width="700"}
+
+<!-- TAB 1 DEMOGRAPHICS -->
+
+### **Demographic Data**
+
 filler
+
+<!-- TAB 2 HEALTH -->
+
+### **Portuguese General Health**
+
+filler
+
+<!-- TAB 3 WEALTH -->
+
+### **Wealth Distribution**
+
+filler
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- PARALLELS SECTION -->
+
+## Parallels with Italy and Spain {data-width = "400"}
+
+<!-- DEMOGRAPHICS GRAPHS -->
+
+###
+
+```{r}
+2+2
+```
+
+<!-- HEALTH GRAPHS -->
+
+###
+
+```{r}
+3+3
+```
+
+<!-- WEALTH GRAPHS -->
+
+###
+
 ```{r}
 4+4
 ```
 
-## **Possible Graph** {data-width="610"}
-filler filler filler
--filler
--filler
-
-```{r}
-5+6
-```
 
 
