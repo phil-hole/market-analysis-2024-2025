@@ -119,11 +119,17 @@ Fruit Snacks, Snack Bars, Sweet Biscuits in Portugal and the strategy of *Vieira
   - "A small meal or amount of food, usually eaten in a hurry." (definition from Oxford Dictionary)
 - What types of snack do we consider?
   - Fruit Snacks (dried fruit, processed fruit snacks).
-  - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack     bars).
-  - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain        biscuits, wafers).
+  - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack
+  bars).
+  - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain
+  biscuits, wafers).
 - How do we outline the snack market?
-  - The Portuguese market consists of the production and retail sales of dried        fruit, processed fruit snacks, cereal bars, energy bars, fruit and nut bars,      other snack bars, chocolate coated biscuits, cookies, filled biscuits, plain      biscuits, wafers.
-  - The market is valued according to retail selling price (RSP) and includes any     applicable taxes (definition from Euromonitor).
+  - The Portuguese market consists of the production and retail sales of dried
+  fruit, processed fruit snacks, cereal bars, energy bars, fruit and nut bars,
+  other snack bars, chocolate coated biscuits, cookies, filled biscuits, plain
+  biscuits, wafers.
+  - The market is valued according to retail selling price (RSP) and includes any
+  applicable taxes (definition from Euromonitor).
 
 <!-- INDEX SECTION -->
 
@@ -152,16 +158,26 @@ collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE,
 
 ##### **Premises to Inference**
 
-The purpose of this section is to state the principles behind our statistical inference. In order to treat the data as objectively as possible, specific behaviours and procedures were followed in regards to the making of the report. Our aim is limiting bias and presenting information through useful representations.
+The purpose of this section is to state the principles behind our statistical inference. 
+In order to treat the data as objectively as possible, specific behaviours and procedures 
+were followed in regards to the making of the report. Our aim is limiting bias and
+presenting information through useful representations.
 
-In order to achieve reliable conclusions, we must conform to a rigid information selection process, in accordance with the following principles:
+In order to achieve reliable conclusions, we must conform to a rigid information 
+selection process, in accordance with the following principles:
 
--   Pertaining to quantitative information and assessing qualitative sources with     care.
--   Thoroughly checking the validity, completeness and accessibility of the           information gathered online.
-  -   Since our data is primarily secondary, we ensure that the external sources        from which we collect data are reliable.
-  -   Information maily gathered from Eurostat (Passport data) and OurWorldinData.
+- Pertaining to quantitative information and assessing qualitative sources with
+care.
+- Thoroughly checking the validity, completeness and accessibility of the
+information gathered online.
+- Since our data is primarily secondary, we ensure that the external sources
+  from which we collect data are reliable.
+  - Information maily gathered from Eurostat (Passport data) and OurWorldinData.
 
-Additionally, to avoid indirect manipulation of the data, much care was placed in choosing the kinds of graphical representation added to the report. Moreso, our analysis was founded upon standardised values so as to guarantee truthful trends acting in function of individual variables. 
+Additionally, to avoid indirect manipulation of the data, much care was placed in
+choosing the kinds of graphical representation added to the report. Moreso, our 
+analysis was founded upon standardised values so as to guarantee truthful trends
+acting in function of individual variables. 
 
 <!-- CHALLENGES FACED SUBSECTION -->
 
@@ -169,11 +185,14 @@ Additionally, to avoid indirect manipulation of the data, much care was placed i
 
 ##### **Challenges Faced**
 
-Throughout the analysis, we incurred in a series of problems that complicated our operations. It is to be expected that a research on a topic as expansive as a market leads to fragmented conclusions or unsatisfactory outcomes. Some issues  faced were:
+Throughout the analysis, we incurred in a series of problems that complicated our
+operations. It is to be expected that a research on a topic as expansive as a
+market leads to fragmented conclusions or unsatisfactory outcomes. Some issues
+faced were:
 
--   Lack of public data for the company of study.
--   Discordant data between sources.
--   Lack of confidence in some data correlation.
+- Lack of public data for the company of study.
+- Discordant data between sources.
+- Lack of confidence in some data correlation.
 
 <!-- OVERCOMING CHALLENGES SUBSECTION -->
 
@@ -181,11 +200,19 @@ Throughout the analysis, we incurred in a series of problems that complicated ou
 
 ##### **Overcoming Challenges**
 
-FILLER TEXT
+To face the set of complications mentioned previously, our initial approach was 
+to evaluate the quality of our available sources. A consideration we had to make
+regarded using data with no adjacent studies, depriving us of the possibility of 
+performing any kind of cross-analysis. Moreso, in situations where varied sources
+would conflict, we would resort to addressing only the most reliable of those 
+considered, following a form of hierarchy of information quality. The aforementioned 
+order would peak with governmental-linked information, followed up by trustworthy 
+data providers. In summary, we attempted to:
 
--   contacting the company
--   brand analysis
--   cross-referencing sources
+- Contact the company to obtain relevant information.
+  - Resorting to a brand analysis for lack of response and of alternatives.
+- Cross-referencing information sources.
+- Attainment at a strict data evaluation hierarchy. 
 
 
 
