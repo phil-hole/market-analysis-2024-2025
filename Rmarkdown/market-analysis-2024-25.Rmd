@@ -55,7 +55,7 @@ csv_remove <-
 
 #-----#
 
-#-Highcharter() scatterplot format
+#HIGHCHARTER() SCATTERPLOT FORMAT
 scplot_custom <- function(x){ 
   x %>% 
     hc_title(style=list(
@@ -82,9 +82,45 @@ scplot_custom <- function(x){
     hc_plotOptions(., scatter=list(color="#db240c"))
   }
 
+#-----#
+
+#HIGHCHARTER LINE CHART FORMAT
+lnplot_custom <- function(x){
+  x %>% 
+    hc_title(style=list(
+               fontWeight="bold",
+               fontSize= "15px",
+               fontFamily= "Lato"
+              )
+             ) %>% 
+    hc_size(width = NULL, height = 350) %>% 
+    hc_yAxis(
+      type="linear",
+      lineWidth=5,
+      labels=list(format="{value}"),
+      lineColor="#ecf0f1") %>%
+    hc_xAxis(
+      type="linear",
+      lineWidth=5,
+      labels=list(format="{value}"), 
+      lineColor="#ecf0f1") %>% 
+    hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>
+          Year: {point.x:.f}<br>Population: {point.y:.f}") %>% 
+    hc_plotOptions(.,line=list(color="#db240c"))
+
+    
+  
+}
+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 
 #DATA IMPORTING
+#when downloading the file, the working directory should automatically set to the path where the Markdown file is saved. if that does not occur, copy the Markdown from the dropdown menu between the "" and run the single line of code.
+setwd("C:/Users/busop/All Files - ORIGINAL FILES OF DESKTOP LINKS/Github/market-analysis-2024-2025/Rmarkdown")
+
 dsets <- list.files(path="./Datasets", pattern = "*.csv", full.names = FALSE)   #vector with file names
 
 dsets <-
@@ -161,7 +197,7 @@ collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE,
 The purpose of this section is to state the principles behind our statistical inference. 
 In order to treat the data as objectively as possible, specific behaviours and procedures 
 were followed in regards to the making of the report. Our aim is limiting bias and
-presenting information through useful representations.
+presenting information through truthful representations.
 
 In order to achieve reliable conclusions, we must conform to a rigid information 
 selection process, in accordance with the following principles:
@@ -170,14 +206,14 @@ selection process, in accordance with the following principles:
 care.
 - Thoroughly checking the validity, completeness and accessibility of the
 information gathered online.
-- Since our data is primarily secondary, we ensure that the external sources
+- Since our data is primarily secondary, ensuring that the external sources
   from which we collect data are reliable.
-  - Information maily gathered from Eurostat (Passport data) and OurWorldinData.
+  - Information mainly gathered from Eurostat (Passport data) and OurWorldinData.
 
 Additionally, to avoid indirect manipulation of the data, much care was placed in
-choosing the kinds of graphical representation added to the report. Moreso, our 
+choosing the kinds of graphical representations added to the report. Moreso, our 
 analysis was founded upon standardised values so as to guarantee truthful trends
-acting in function of individual variables. 
+evolving coherently  to specified indexes. 
 
 <!-- CHALLENGES FACED SUBSECTION -->
 
@@ -202,12 +238,12 @@ faced were:
 
 To face the set of complications mentioned previously, our initial approach was 
 to evaluate the quality of our available sources. A consideration we had to make
-regarded using data with no adjacent studies, depriving us of the possibility of 
+regarded using data with no adjacent studies, which deprived us of the possibility of 
 performing any kind of cross-analysis. Moreso, in situations where varied sources
 would conflict, we would resort to addressing only the most reliable of those 
 considered, following a form of hierarchy of information quality. The aforementioned 
 order would peak with governmental-linked information, followed up by trustworthy 
-data providers. In summary, we attempted to:
+data providers. In total, we attempted to:
 
 - Contact the company to obtain relevant information.
   - Resorting to a brand analysis for lack of response and of alternatives.
@@ -223,16 +259,15 @@ data providers. In summary, we attempted to:
 
 <!-- POPULATION SECTION -->
 
-## Population {.tabset .tabset-fade data-width="550"}
+## Population {.tabset .tabset-fade data-width="650"}
 
 <!-- TAB 1 DEMOGRAPHICS -->
 
 ### **Demographic Data**
 
-filler
+####
 
 ```{r PORTUGAL DEMOGRAPHICS}
-5+5
 ```
 
 <!-- TAB 2 HEALTH -->
@@ -261,10 +296,94 @@ filler
 
 ###
 
-filler
+The primary element to consider when trying to understand Portuguese society is 
+population. Data from the past 200 years shows a exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Important to mention is the period of general peace following the Second World War, as contexts offering stability and security favour demographic growth.
+
+Another relevant information regards that of population density. Analysing this statistic in the same timespan, we notice a  fluctuating trend common throughout the entire 
 
 ```{ShinyUI PORTUGAL SPAIN ITALY PARALLELS r}
 2+2
+```
+
+<!-- INTRODUCTION PAGE -->
+
+# Economic Overview
+
+<!-- SECTION 1 -->
+
+## Section 1
+
+###
+
+```{r}
+
+#CREATION OF CLEAN POPULATION, POPULATION DENSITY DATASETS
+selected_nations <- c("Portugal", "Spain", "Italy")
+
+clean_population <- 
+  dsets[["portugal_population"]] %>% 
+  select(-Code) %>% 
+  filter(Year >= 1800 & Entity %in% selected_nations) %>% 
+  rename(`Population` = Population..historical.)
+
+clean_population_density <-
+  dsets[["portugal_population_density"]] %>% 
+  select(-Code) %>% 
+  filter(Year >= 1800 & Entity %in% selected_nations)%>% 
+  rename(`Population Density` = Population.density)
+
+selected_population <-  
+  clean_population %>%
+  filter(Entity == "Portugal") %>%
+  hchart("line", hcaes(`Year`, `Population`)) %>%
+  hc_title(text = "Portuguese Population") %>%
+  hc_xAxis(title= list("Year"), align="middle") %>%
+  hc_yAxis(title= list("Population"), align="middle") %>% 
+  lnplot_custom(.)
+
+selected_population_density <-
+  clean_population_density %>% 
+  filter(Entity == "Portugal") %>% 
+  hchart("line", hcaes(`Year`, `Population Density`)) %>% 
+  hc_title(text = "Portugese Population Density") %>% 
+  hc_xAxis(title= list("Year"), align="middle") %>%
+  hc_yAxis(title= list("Population Density"), align="middle") %>% 
+  lnplot_custom(.)
+
+selected_population_graphs <- c(selected_population, selected_population_density)
+population_graph_choices <- c("Population", "Population Density")
+
+population_ui <- 
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 3,
+        selectInput("population_graph", label= "Select Graph:", 
+                    choices= population_graph_choices, 
+                    selected= "Population")
+      ),
+      mainPanel(
+        width = 9,
+        highchartOutput("population_placeholder")
+      ),
+      position = c("left", "right")
+    )
+  })
+
+population_server_logic <- function(input, output){
+  highchart_population_selection <- reactive({
+    final_population_graph <- 
+      population_graph_choices[population_graph_choices %in% input$population_graph]
+  })
+  
+  output$population_placeholder <- renderHighchart({
+    final_population_graph <- highchart_population_selection()
+    final_population_graph <- final_population_graph[[1]]
+    final_population_graph
+  })
+}
+
+shinyApp(ui = population_ui, server = population_server_logic)
 ```
 
 
