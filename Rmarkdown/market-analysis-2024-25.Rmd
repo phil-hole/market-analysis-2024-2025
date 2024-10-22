@@ -40,7 +40,8 @@ pacman::p_load(
   broom,           #--needed to convert linear model for interpolation line into dataframe
   dygraphs,        #--package for time series model creation
   xts,             #--data format required by dygraphs
-  shiny            #--"runtime: shiny" in JMAL header already loads the library, useful for debugging w/o knitting
+  shiny,           #--"runtime: shiny" in JMAL header already loads the library, useful for debugging w/o                       knitting
+  shinyWidgets     #--additional customisation for shiny elements
 )
 ```
 
@@ -265,9 +266,86 @@ data providers. In total, we attempted to:
 
 ### **Demographic Data**
 
-####
+The primary element to consider when trying to understand Portuguese society is 
+population. Data from the past 200 years shows a exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Important to mention is the period of general peace following the Second World War, as contexts offering stability and security favour demographic growth.
+
+Another relevant information regards that of population density. Analysing this statistic in the same timespan, we notice a  fluctuating trend common throughout the entire 
+ 
+  
+   
+    
 
 ```{r PORTUGAL DEMOGRAPHICS}
+#CREATION OF CLEAN POPULATION, POPULATION DENSITY DATASETS
+clean_population <- 
+  dsets[["portugal_population"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal") %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Population` = Population..historical.) 
+  
+clean_population_density <-
+  dsets[["portugal_population_density"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Population Density` = Population.density)
+
+pop_ui <-
+  fluidPage({
+    sidebarLayout(
+      mainPanel(
+        width = 8,
+        highchartOutput(
+          outputId = "selected_pop",
+          width = "500px",
+          height = "400px"
+        )
+      ),
+      
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "pop_choice",
+          label = "Population Graphs",
+          choices = c("Population", "Population Density"),
+          selected = "Population",
+          options = list(style = "btn-danger"),
+          width = "100%"
+        )
+      ),
+      
+      position = c("left", "right")
+    )
+  })
+
+
+pop_server_logic <- function(input, output){
+  output$selected_pop <- renderHighchart({
+    selected_pop_graph <- reactive({
+      switch(input$pop_choice,
+             "Population" = clean_population,
+             "Population Density" = clean_population_density)
+    })
+    
+    pop_y_axis <- 
+      switch(input$pop_choice,
+             "Population" = "Population",
+             "Population Density" = "Population Density") 
+
+    pop_title <- 
+      switch(input$pop_choice,
+             "Population" = "Population",
+             "Population Density" = "Population Density")
+      
+    selected_pop_graph() %>% 
+      hchart("line", hcaes(x = `Year`, y = !!sym(pop_y_axis))) %>% 
+      hc_title(text = "Population and Population Density Charts") %>%
+      # hc_xAxis(title= list("Year"), align="middle") %>%
+      hc_yAxis(align="middle") %>%
+      lnplot_custom(.)
+  })
+}
+
+shinyApp(ui = pop_ui, server = pop_server_logic)
 ```
 
 <!-- TAB 2 HEALTH -->
@@ -296,10 +374,7 @@ filler
 
 ###
 
-The primary element to consider when trying to understand Portuguese society is 
-population. Data from the past 200 years shows a exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Important to mention is the period of general peace following the Second World War, as contexts offering stability and security favour demographic growth.
 
-Another relevant information regards that of population density. Analysing this statistic in the same timespan, we notice a  fluctuating trend common throughout the entire 
 
 ```{ShinyUI PORTUGAL SPAIN ITALY PARALLELS r}
 2+2
@@ -316,74 +391,6 @@ Another relevant information regards that of population density. Analysing this 
 ###
 
 ```{r}
-
-#CREATION OF CLEAN POPULATION, POPULATION DENSITY DATASETS
-selected_nations <- c("Portugal", "Spain", "Italy")
-
-clean_population <- 
-  dsets[["portugal_population"]] %>% 
-  select(-Code) %>% 
-  filter(Year >= 1800 & Entity %in% selected_nations) %>% 
-  rename(`Population` = Population..historical.)
-
-clean_population_density <-
-  dsets[["portugal_population_density"]] %>% 
-  select(-Code) %>% 
-  filter(Year >= 1800 & Entity %in% selected_nations)%>% 
-  rename(`Population Density` = Population.density)
-
-selected_population <-  
-  clean_population %>%
-  filter(Entity == "Portugal") %>%
-  hchart("line", hcaes(`Year`, `Population`)) %>%
-  hc_title(text = "Portuguese Population") %>%
-  hc_xAxis(title= list("Year"), align="middle") %>%
-  hc_yAxis(title= list("Population"), align="middle") %>% 
-  lnplot_custom(.)
-
-selected_population_density <-
-  clean_population_density %>% 
-  filter(Entity == "Portugal") %>% 
-  hchart("line", hcaes(`Year`, `Population Density`)) %>% 
-  hc_title(text = "Portugese Population Density") %>% 
-  hc_xAxis(title= list("Year"), align="middle") %>%
-  hc_yAxis(title= list("Population Density"), align="middle") %>% 
-  lnplot_custom(.)
-
-selected_population_graphs <- c(selected_population, selected_population_density)
-population_graph_choices <- c("Population", "Population Density")
-
-population_ui <- 
-  fluidPage({
-    sidebarLayout(
-      sidebarPanel(
-        width = 3,
-        selectInput("population_graph", label= "Select Graph:", 
-                    choices= population_graph_choices, 
-                    selected= "Population")
-      ),
-      mainPanel(
-        width = 9,
-        highchartOutput("population_placeholder")
-      ),
-      position = c("left", "right")
-    )
-  })
-
-population_server_logic <- function(input, output){
-  highchart_population_selection <- reactive({
-    final_population_graph <- 
-      population_graph_choices[population_graph_choices %in% input$population_graph]
-  })
-  
-  output$population_placeholder <- renderHighchart({
-    final_population_graph <- highchart_population_selection()
-    final_population_graph <- final_population_graph[[1]]
-    final_population_graph
-  })
-}
-
-shinyApp(ui = population_ui, server = population_server_logic)
 ```
 
 
