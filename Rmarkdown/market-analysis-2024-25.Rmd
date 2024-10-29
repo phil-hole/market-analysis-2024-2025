@@ -276,76 +276,123 @@ Another relevant information regards that of population density. Analysing this 
     
 
 ```{r PORTUGAL DEMOGRAPHICS}
-#CREATION OF CLEAN POPULATION, POPULATION DENSITY DATASETS
+#CREATION OF CLEAN POPULATION, POPULATION DENSITY, LIFE EXPECTANCY, IMMIGRATION STOCK DATASETS
 clean_population <- 
   dsets[["portugal_population"]] %>% 
   filter(Year >= 1800 & Entity == "Portugal") %>% 
   select(-Code, -Entity) %>% 
-  rename(`Population` = Population..historical.) 
+  rename(`Population` = Population..historical.) %>% 
+  hchart("line", hcaes(`Year`, `Population`)) %>% 
+  hc_title(text = "Portuguese Population") %>% 
+  hc_yAxis(title=list(text="<b>Population</b>", align="middle")) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population: {point.y:.f} inhab") %>% 
+  hc_caption(
+    text = "<b>Population</b> = number of inhabitants of a country, at any given year."
+  )
+  
   
 clean_population_density <-
   dsets[["portugal_population_density"]] %>% 
   filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
   select(-Code, -Entity) %>% 
-  rename(`Population Density` = Population.density)
+  rename(`Population Density` = Population.density) %>% 
+  hchart("line", hcaes(`Year`, `Population Density`)) %>% 
+  hc_title(text = "Portuguese Population Density") %>% 
+  hc_yAxis(title = list(text = "<b>Population Density</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population Density: {point.y:.1f} inhab/kmsq") %>% 
+  hc_caption(
+    text = "<b>Population Density</b> = population per square kilometer by country."
+  )
 
-pop_ui <-
+clean_immigration <-
+  dsets[["portugal_migrant_stock"]]%>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`International Immigrants` = Total.number.of.international.immigrants)%>% 
+  hchart("line", hcaes(`Year`, `International Immigrants`)) %>% 
+  hc_title(text = "Portuguese International Immigrants") %>% 
+  hc_yAxis(title = list(text = "<b>N° Immigrants</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Immigrant Stock: {point.y:.f} inhab") %>% 
+     hc_caption(
+    text = "<b>International Immigration Stock</b> = people living in a given country who were born in another country, recorded at mid-year by age and sex and by region, country or area of destination."
+  )
+
+clean_life_expectancy <-
+  dsets[["portugal_life_expectancy"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0) %>% 
+  hchart("line", hcaes(`Year`, `Life Expectancy`)) %>% 
+  hc_title(text = "Portuguese Life Expectancy") %>% 
+  hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>% 
+   hc_caption(
+    text = "<b>Life Expectancy</b> = metric that summarizes death rates across all age groups in one particular year.
+"
+  )
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+pop_graph_choice <- c('Population', 'Population Density', 'Life Expectancy', 'International Immigrants')
+pop_graph_code <- list(clean_population, clean_population_density, clean_life_expectancy, clean_immigration)
+
+pop_graph_ui <-
   fluidPage({
     sidebarLayout(
-      mainPanel(
-        width = 8,
-        highchartOutput(
-          outputId = "selected_pop",
-          width = "500px",
-          height = "400px"
-        )
-      ),
-      
       sidebarPanel(
         width = 4,
         pickerInput(
-          inputId = "pop_choice",
-          label = "Population Graphs",
-          choices = c("Population", "Population Density"),
-          selected = "Population",
+          inputId = "pop_selection",
+          label = "Demographics Graphs",
+          choices = pop_graph_choice,
+          selected = pop_graph_choice[1],
           options = list(style = "btn-danger"),
           width = "100%"
         )
+      ),
+      
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "pop_highchart")
       ),
       
       position = c("left", "right")
     )
   })
 
-
-pop_server_logic <- function(input, output){
-  output$selected_pop <- renderHighchart({
-    selected_pop_graph <- reactive({
-      switch(input$pop_choice,
-             "Population" = clean_population,
-             "Population Density" = clean_population_density)
-    })
-    
-    pop_y_axis <- 
-      switch(input$pop_choice,
-             "Population" = "Population",
-             "Population Density" = "Population Density") 
-
-    pop_title <- 
-      switch(input$pop_choice,
-             "Population" = "Population",
-             "Population Density" = "Population Density")
-      
-    selected_pop_graph() %>% 
-      hchart("line", hcaes(x = `Year`, y = !!sym(pop_y_axis))) %>% 
-      hc_title(text = "Population and Population Density Charts") %>%
-      # hc_xAxis(title= list("Year"), align="middle") %>%
-      hc_yAxis(align="middle") %>%
-      lnplot_custom(.)
+pop_graph_server <- function(input, output){
+  pop_selected <- reactive({
+    pop_graph_code[pop_graph_choice %in% input$pop_selection]
   })
-}
-
-shinyApp(ui = pop_ui, server = pop_server_logic)
+  
+  output$pop_highchart <-
+    renderHighchart({
+      temp <- pop_selected() 
+      temp[[1]]
+    })
+  }
+      
+shinyApp(ui = pop_graph_ui, server = pop_graph_server)
 ```
 
 <!-- TAB 2 HEALTH -->
@@ -355,7 +402,85 @@ shinyApp(ui = pop_ui, server = pop_server_logic)
 filler
 
 ```{r PORTUGAL HEALTH}
-7*2
+clean_calorie_intake <-
+  dsets[["portugal_daily_caloric_supply"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Daily Calorie Supply` = Daily.calorie.supply.per.person) %>% 
+  hchart("line", hcaes(`Year`, `Daily Calorie Supply`)) %>% 
+  hc_title(text = "Portuguese Daily Calorie Intake") %>% 
+  hc_yAxis(title = list(text = "<b>Average Daily Calorie Intake</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Average Daily Calorie Intake: {point.y:.1f} kcal") %>% 
+  hc_caption(
+    text = "<b>Per Capita Daily Calorie Supply</b> = amount of calories available to an average person, not   necessarily the calories actually consumed by that person."
+  )
+  
+clean_obesity_rate <-
+  dsets[["portugal_overweight_adults"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Overweight Share of Adults` =
+           Share.of.adults.who.are.overweight..age.standardized....Sex..both.sexes...Age.group..18...years) %>% 
+  hchart("line", hcaes(`Year`, `Overweight Share of Adults`)) %>% 
+  hc_title(text = "Portuguese Obesity Rate") %>% 
+  hc_yAxis(title = list(text = "<b>Obesity Rate</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Obesity Rate: {point.y:.1f}%") %>% 
+  hc_caption(
+    text = "<b>Obesity Rate</b> = percentage of adults aged 18+ years with a body mass index (BMI) of 25 kg/m2 or higher."
+  )
+  
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+health_graph_choice <- c('Daily Calorie Intake', 'Obesity Rate')
+health_graph_code <- list(clean_calorie_intake, clean_obesity_rate)
+
+health_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "health_selection",
+          label = "Health Infographics",
+          choices = health_graph_choice,
+          selected = health_graph_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        )
+      ),
+      
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "health_highchart")
+      ),
+      
+      position = c("left", "right")
+    )
+  })
+
+health_graph_server <- function(input, output){
+  health_selected <- reactive({
+    health_graph_code[health_graph_choice %in% input$health_selection]
+  })
+  
+  output$health_highchart <-
+    renderHighchart({
+      temp <- health_selected() 
+      temp[[1]]
+    })
+  }
+      
+shinyApp(ui = health_graph_ui, server = health_graph_server)
 ```
 
 <!-- TAB 3 WEALTH -->
@@ -365,7 +490,103 @@ filler
 filler
 
 ```{r PORTUGAL WEALTH}
-6+6
+#CLEAN GDP PRO CAPITA, HDI DATASETS
+clean_gdp_capita <-
+  dsets[["portugal_gdp_per_capita"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`GDP per capita` = GDP.per.capita..PPP..constant.2017.international...) %>% 
+  hchart("line", hcaes(`Year`, `GDP per capita`)) %>% 
+  hc_title(text = "Portuguese GDP per Capita") %>% 
+  hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per capita: {point.y:.f} $/inhab") %>% 
+  hc_caption(
+    text = "<b>GDP per Capita</b> = gross domestic product converted to international dollars using purchasing power parity rates, put into relation with population size."
+  )
+
+clean_hdi <-
+  dsets[["portugal_hdi"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`HDI` = Human.Development.Index) %>% 
+  hchart("line", hcaes(`Year`, `HDI`)) %>% 
+  hc_title(text = "Portuguese Human Development Index") %>% 
+  hc_yAxis(title = list(text = "<b>Human Development Index</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>HDI: {point.y:.f}") %>% 
+  hc_caption(
+    text = "<b>Human Development Index</b> = summary measure of key dimensions of human development (e.g. a long and healthy life, a good education, and a decent standard of living)."
+  )
+
+clean_poverty_percentage <-
+  dsets[["portugal_population_poverty"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Poverty Ratio` = Poverty.headcount.ratio.at.national.poverty.lines....of.population.) %>% 
+  hchart("line", hcaes(`Year`, `Poverty Ratio`)) %>% 
+  hc_title(text = "Portuguese Relative Population Poverty Percentage") %>% 
+  hc_yAxis(title = list(text = "<b>National Poverty Headcount Ratio</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  lnplot_custom(.) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Poverty Percentage: {point.y:.1f}%") %>% 
+  hc_caption(
+    text = "<b>National poverty headcount ratio</b> =  percentage of the population living below the national poverty line(s). <br>National estimates are based on population-weighted subgroup estimates from household surveys."
+  )
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+wealth_graph_choice <- c('GDP per Capita', 'Human Development Index', 'National Poverty Headcount Ratio')
+wealth_graph_code <- list(clean_gdp_capita, clean_hdi, clean_poverty_percentage)
+
+wealth_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "wealth_selection",
+          label = "Economic Indicators",
+          choices = wealth_graph_choice,
+          selected = wealth_graph_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        )
+      ),
+
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "wealth_highchart")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+wealth_graph_server <- function(input, output){
+  wealth_selected <- reactive({
+    wealth_graph_code[wealth_graph_choice %in% input$wealth_selection]
+  })
+
+  output$wealth_highchart <-
+    renderHighchart({
+      temp <- wealth_selected()
+      temp[[1]]
+    })
+  }
+
+shinyApp(ui = wealth_graph_ui, server = wealth_graph_server)
 ```
 
 <!-- PARALLELS SECTION -->
@@ -380,17 +601,63 @@ filler
 2+2
 ```
 
-<!-- INTRODUCTION PAGE -->
+<!-- ECONOMIC PAGE -->
 
 # Economic Overview
 
 <!-- SECTION 1 -->
 
-## Section 1
+## General Economic Overview
 
 ###
-
+filler
 ```{r}
+2+2
+# graph_ui <-
+#   fluidPage({
+#     sidebarLayout(
+#       sidebarPanel(
+#         width = 4,
+#         pickerInput(
+#           inputId = "selection",
+#           label = "Population Graphs",
+#           choices = graph_choice,
+#           selected = graph_choice[1],
+#           options = list(style = "btn-danger"),
+#           width = "100%"
+#         )
+#       ),
+#       
+#       mainPanel(
+#         width = 8,
+#         highchartOutput(outputId = "highchart")
+#       ),
+#       
+#       position = c("left", "right")
+#     )
+#   })
+# 
+# graph_server <- function(input, output){
+#   selected <- reactive({
+#     graph_code[graph_choice %in% input$selection]
+#   })
+#   
+#   output$highchart <-
+#     renderHighchart({
+#       temp <- selected() 
+#       temp[[1]]
+#     })
+#   }
+#       
+# shinyApp(ui = graph_ui, server = graph_server)
 ```
 
+## Overview of the Snack Market
+
+###
+filler
+
+```{r}
+4+4
+```
 
