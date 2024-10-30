@@ -591,14 +591,14 @@ shinyApp(ui = wealth_graph_ui, server = wealth_graph_server)
 
 <!-- PARALLELS SECTION -->
 
-## Parallels with Italy and Spain {data-width = "450"}
+## Parallels{data-width = "450"}
 
-###
+### **Parallels with Italy and Spain** 
 
 
 
-```{ShinyUI PORTUGAL SPAIN ITALY PARALLELS r}
-2+2
+```{r PORTUGAL SPAIN ITALY PARALLELS}
+
 ```
 
 <!-- ECONOMIC PAGE -->
@@ -655,9 +655,107 @@ filler
 ## Overview of the Snack Market
 
 ###
-filler
+sitography:
+https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
 ```{r}
 4+4
+```
+
+# Graph Tester
+
+## Graph Tester
+
+```{r}
+pickerIp_choice <- c("Population", "Life Expectancy", "GDP per Capita")
+radioBn_choice <- c("Portugal", "Italy", "Spain")
+
+parallels_population <-
+  dsets[["portugal_population"]] %>% 
+  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
+  select(-Code) %>% 
+  rename(`Population` = Population..historical.)
+
+parallels_life_expect <-
+  dsets[["portugal_life_expectancy"]] %>% 
+  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
+  select(-Code) %>% 
+  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0)
+
+parallels_gdp <-
+  dsets[["portugal_gdp_per_capita"]] %>% 
+  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
+  select(-Code) %>% 
+  rename(`GDP per capita` = GDP.per.capita..PPP..constant.2017.international...)
+  
+
+parallels_graph_code <- list(parallels_population, parallels_life_expect, parallels_gdp)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+
+parallels_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "parallels_selection",
+          label = "Comparison Factor",
+          choices = pickerIp_choice,
+          selected = pickerIp_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        ),
+        radioButtons(inputId = "radioB_specifics", 
+               label = "Countries Compared",
+               choices = radioBn_choice,
+               selected = radioBn_choice[1])
+      ),
+
+      mainPanel(
+        width = 8,
+        reactableOutput(outputId = "parallels_reactable")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+parallels_graph_server <- function(input, output){
+  parallels_graph_choice <- reactive({
+    if(input$parallels_selection == pickerIp_choice[1]){
+      parallels_graph_code[1]
+    } else if(input$parallels_selection == pickerIp_choice[2]){
+      parallels_graph_code[2]
+    }else{
+      parallels_graph_code[(length(parallels_graph_code))]
+    }
+    
+  })
+  
+  parallels_filtered_data <-
+    reactive({
+      if(input$parallels_selection == pickerIp_choice[1]){
+        parallels_graph_choice() %>% 
+          filter(Entity %in% input$radioB_specifics) %>% 
+          reactable(.)
+      } else if(input$parallels_selection == pickerIp_choice[2]){
+        parallels_graph_choice() %>% 
+          filter(Entity %in% input$radioB_specifics) %>% 
+          reactable(.)
+      }
+      else {
+        print("End")
+      }
+    })
+  
+  
+  output$parallels_reactable <-
+    parallels_filtered_data()
+
+}
+
+shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ```
 
