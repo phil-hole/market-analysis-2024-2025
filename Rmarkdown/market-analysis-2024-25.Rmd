@@ -598,7 +598,148 @@ shinyApp(ui = wealth_graph_ui, server = wealth_graph_server)
 
 
 ```{r PORTUGAL SPAIN ITALY PARALLELS}
+#CLEAN PARALLELS DATASETS
+pickerIp_choice <- c("Population Growth Rate", "Life Expectancy", "GDP per Capita")
+radioBn_choice <- c("Portugal", "Italy", "Spain")
 
+parallels_population <-
+  dsets[["portugal_population_growth_rate"]] %>%
+  filter(Year >= 1950 & Entity %in% radioBn_choice) %>%
+  select(-Code) %>%
+  rename(`Population` = Population.growth.rate)
+
+parallels_life_expect <-
+  dsets[["portugal_life_expectancy"]] %>%
+  filter(Year >= 1950 & Entity %in% radioBn_choice) %>%
+  select(-Code) %>%
+  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0)
+
+parallels_gdp <-
+  dsets[["portugal_gdp_per_capita"]] %>%
+  filter(Year >= 1800 & Entity %in% radioBn_choice) %>%
+  select(-Code) %>%
+  rename(`GDP per capita` = GDP.per.capita..PPP..constant.2017.international...)
+
+
+parallels_graph_code <- list(parallels_population, parallels_life_expect, parallels_gdp)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+
+parallels_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "parallels_selection",
+          label = "Comparison Factor",
+          choices = pickerIp_choice,
+          selected = pickerIp_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        ),
+        checkboxGroupButtons(inputId = "radioB_specifics",
+               label = "Countries Compared",
+               choices = radioBn_choice,
+               selected = radioBn_choice[1])
+      ),
+
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "parallels_highchart")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+parallels_graph_server <- function(input, output){
+  parallels_topic_choice <- reactive({
+    if(input$parallels_selection == pickerIp_choice[1]){
+      parallels_graph_code[1]
+    } else if(input$parallels_selection == pickerIp_choice[2]){
+      parallels_graph_code[2]
+    }else{
+      parallels_graph_code[(length(parallels_graph_code))]
+    }
+  })
+  
+  parallels_scale <- reactive({
+    if(input$parallels_selection == pickerIp_choice[1]){
+      c(-3, 3)
+    }else if(input$parallels_selection == pickerIp_choice[2]){
+      c(40, 100)
+    }else{
+      c(5000, 50000)
+    }
+  })
+
+  parallels_filtered_data <-
+    reactive({
+      temp <- parallels_topic_choice()
+      temp <- temp[[1]]
+      scale <- parallels_scale()
+
+      if(input$parallels_selection == pickerIp_choice[1]){
+        temp %>%
+          filter(Entity %in% as.character(input$radioB_specifics)) %>%
+          hchart("line", hcaes(`Year`, `Population`)) %>%
+          hc_title(text = "Population Growth Rate Comparison") %>%
+          hc_yAxis(title = list(text = "<b>Population Growth Rate</b>", align = "middle")) %>%
+          hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
+          lnplot_custom(.) %>%
+          hc_yAxis(min = scale[1], max = scale[2]) %>% 
+          hc_tooltip(.,
+           headerFormat = "",
+           pointFormat =
+             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.f}%") %>%
+          hc_caption(
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>"
+          )
+      } else if(input$parallels_selection == pickerIp_choice[2]){
+        temp %>%
+          filter(Entity %in% as.character(input$radioB_specifics)) %>%
+          hchart("line", hcaes(`Year`, `Life Expectancy`)) %>%
+          hc_title(text = "Life Expectancy Comparison") %>%
+          hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>%
+          hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
+          lnplot_custom(.) %>%
+          hc_yAxis(min = scale[1], max = scale[2]) %>% 
+          hc_tooltip(.,
+           headerFormat = "",
+           pointFormat =
+             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>%
+          hc_caption(
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's life expectancy.</b>"
+          )      }
+      else {
+        temp %>%
+          filter(Entity %in% as.character(input$radioB_specifics)) %>%
+          hchart("line", hcaes(`Year`, `GDP per capita`)) %>%
+          hc_title(text = "GDP per Capita Comparison") %>%
+          hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle")) %>%
+          hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
+          lnplot_custom(.) %>%
+          hc_yAxis(min = scale[1], max = scale[2]) %>% 
+          hc_tooltip(.,
+           headerFormat = "",
+           pointFormat =
+             "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per Capita: {point.y:.0f} $/inhab") %>%
+          hc_caption(
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's GDP per capita.</b>"
+          )
+      }
+    })
+
+  output$parallels_highchart <- renderHighchart({
+    req(input$radioB_specifics)
+    parallels_filtered_data()
+  })
+
+}
+
+shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ```
 
 <!-- ECONOMIC PAGE -->
@@ -612,7 +753,18 @@ shinyApp(ui = wealth_graph_ui, server = wealth_graph_server)
 ###
 filler
 ```{r}
-2+2
+economic_factor_choice <- c("Real GDP", "Real GDP Growth Rate", "Unemployment Rate", "Inflation Rate")
+
+
+```
+
+## Overview of the Snack Market
+
+###
+sitography:
+https://www.geeksforgeeks.org/if-else-if-statement-in-r/
+
+```{r}
 # graph_ui <-
 #   fluidPage({
 #     sidebarLayout(
@@ -652,110 +804,247 @@ filler
 # shinyApp(ui = graph_ui, server = graph_server)
 ```
 
-## Overview of the Snack Market
 
-###
-sitography:
-https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
-```{r}
-4+4
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Graph Tester
 
 ## Graph Tester
 
 ```{r}
-pickerIp_choice <- c("Population", "Life Expectancy", "GDP per Capita")
-radioBn_choice <- c("Portugal", "Italy", "Spain")
-
-parallels_population <-
-  dsets[["portugal_population"]] %>% 
-  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
-  select(-Code) %>% 
-  rename(`Population` = Population..historical.)
-
-parallels_life_expect <-
-  dsets[["portugal_life_expectancy"]] %>% 
-  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
-  select(-Code) %>% 
-  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0)
-
-parallels_gdp <-
-  dsets[["portugal_gdp_per_capita"]] %>% 
-  filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
-  select(-Code) %>% 
-  rename(`GDP per capita` = GDP.per.capita..PPP..constant.2017.international...)
+# pickerIp_choice <- c("Population", "Life Expectancy", "GDP per Capita")
+# radioBn_choice <- c("Portugal", "Italy", "Spain")
+# parallel_series_colours <- c("Portugal" = "#db240c", "Italy" = "#046A38", "Spain" = "#FFE900")
+# 
+# parallels_population <-
+#   dsets[["portugal_population"]] %>% 
+#   filter(Year >= 1950 & Entity %in% radioBn_choice) %>% 
+#   select(-Code) %>% 
+#   rename(`Value` = Population..historical.)
+# 
+# parallels_life_expect <-
+#   dsets[["portugal_life_expectancy"]] %>% 
+#   filter(Year >= 1950 & Entity %in% radioBn_choice) %>% 
+#   select(-Code) %>% 
+#   rename(`Value` = Period.life.expectancy.at.birth...Sex..all...Age..0)
+# 
+# parallels_gdp <-
+#   dsets[["portugal_gdp_per_capita"]] %>% 
+#   filter(Year >= 1800 & Entity %in% radioBn_choice) %>% 
+#   select(-Code) %>% 
+#   rename(`Value` = GDP.per.capita..PPP..constant.2017.international...)
+#   
+# 
+# parallels_graph_code <- list(parallels_population, parallels_life_expect, parallels_gdp)
+# 
+# #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+# #UI AND SERVER LOGIC
+# 
+# parallels_graph_ui <-
+#   fluidPage({
+#     sidebarLayout(
+#       sidebarPanel(
+#         width = 4,
+#         pickerInput(
+#           inputId = "parallels_selection",
+#           label = "Comparison Factor",
+#           choices = pickerIp_choice,
+#           selected = pickerIp_choice[1],
+#           options = list(style = "btn-danger"),
+#           width = "100%"
+#         ),
+#         checkboxGroupInput(inputId = "radioB_specifics", 
+#                label = "Countries Compared",
+#                choices = radioBn_choice,
+#                selected = radioBn_choice[1])
+#       ),
+# 
+#       mainPanel(
+#         width = 8,
+#         highchartOutput(outputId = "parallels_highchart")
+#       ),
+# 
+#       position = c("left", "right")
+#     )
+#   })
+# 
+# parallels_graph_server <- function(input, output){
+#   parallels_topic_choice <- reactive({
+#     if(input$parallels_selection == pickerIp_choice[1]){
+#       parallels_graph_code[1]
+#     } else if(input$parallels_selection == pickerIp_choice[2]){
+#       parallels_graph_code[2]
+#     }else{
+#       parallels_graph_code[(length(parallels_graph_code))]
+#     }
+#   })
+#   
+#   parallels_nation_filter <-
+#     reactive({
+#       req(parallels_topic_choice(), input$radioB_specifics)
+#       temp <- parallels_topic_choice()
+#       temp <- temp[[1]] %>%
+#         filter(Entity %in% as.character(input$radioB_specifics))
+#     })
+#   
+#   output$parallels_highchart <- renderHighchart({
+#     parallels_placeholder <- 
+#       highchart() %>% 
+#       hc_chart(type = "line")
+#     
+#     for(nation in input$radioB_specifics){
+#       parallels_nation_filter() %>% 
+#         filter(Entity == !!nation) %>% 
+#         hc_add_series(parallels_placeholder,
+#                       data = .,
+#                       name = nation
+#         )
+#     }
+#     
+#     parallels_placeholder
+#   })
+#   
+  # parallels_filtered_data <-
+  #   reactive({
+  #     req(input$parallels_selection)
+  #     temp <- parallels_topic_choice()
+  #     temp <- temp[[1]] %>% 
+  #       filter(Entity %in% as.character(input$radioB_specifics))
+  #     hc <- highchart()
+  #     
+  #     if(input$parallels_selection == pickerIp_choice[1]){
+  #       hc %>% 
+  #         hc_title(text = "Population Comparison") %>% 
+  #         hc_yAxis(title = list(text = "<b>Population</b>", align = "middle")) %>% 
+  #         hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  #         lnplot_custom(.) %>% 
+  #         hc_tooltip(., 
+  #          headerFormat = "",
+  #          pointFormat = 
+  #            "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population: {point.y:.f} inhab") %>% 
+  #         hc_caption(
+  #           text = "<b>FILLER FOR NOW</b>"
+  #         )
+  #       
+  #       for (nation in unique(temp$Entity)) {
+  #         nation_data <- 
+  #           temp %>% 
+  #           filter(Entity == nation)
+  #         hc <- hc %>%
+  #           hc_add_series(
+  #             data = nation_data,
+  #             type = "line",
+  #             hcaes(`Year`, `Population`),
+  #             name = nation,
+  #             color = parallel_series_colours[nation]
+  #           )
+  #       }
+  #     }
+  #     
+  #     else if(input$parallels_selection == pickerIp_choice[2]){
+  #       hc <-
+  #         hc_title(text = "Life Expectancy Comparison") %>% 
+  #         hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>% 
+  #         hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  #         lnplot_custom(.) %>% 
+  #         hc_tooltip(., 
+  #          headerFormat = "",
+  #          pointFormat = 
+  #            "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.f} years") %>% 
+  #         hc_caption(
+  #           text = "<b>FILLER FOR NOW</b>"
+  #         )
+  #       
+  #       for (nation in unique(temp$Entity)) {
+  #         nation_data <- 
+  #           temp %>% 
+  #           filter(Entity == nation)
+  #         hc <- hc %>%
+  #           hc_add_series(
+  #             data = nation_data,
+  #             type = "line",
+  #             hcaes(`Year`, `Life Expectancy`),
+  #             name = nation,
+  #             color = parallel_series_colours[nation]
+  #           )
+  #       }
+  #     }
+  #     else {
+  #       hc <-
+  #         hc_title(text = "GDP per Capita Comparison") %>% 
+  #         hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle")) %>% 
+  #         hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  #         lnplot_custom(.) %>% 
+  #         hc_tooltip(., 
+  #          headerFormat = "",
+  #          pointFormat = 
+  #            "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per Capita: {point.y:.f} $/inhab") %>% 
+  #         hc_caption(
+  #           text = "<b>FILLER FOR NOW</b>"
+  #         )
+  #       
+  #       for (nation in unique(temp$Entity)) {
+  #         nation_data <- 
+  #           temp %>% 
+  #           filter(Entity == nation)
+  #         hc <- hc %>%
+  #           hc_add_series(
+  #             data = nation_data,
+  #             type = "line",
+  #             hcaes(`Year`, `GDP per capita`),
+  #             name = nation,
+  #             color = parallel_series_colours[nation]
+  #           )
+  #       }
+  #     }
+  #   })
   
+  # output$parallels_highchart <- renderHighchart({
+  #   parallels_filtered_data()
+  # })
 
-parallels_graph_code <- list(parallels_population, parallels_life_expect, parallels_gdp)
+# }
 
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-#UI AND SERVER LOGIC
-
-parallels_graph_ui <-
-  fluidPage({
-    sidebarLayout(
-      sidebarPanel(
-        width = 4,
-        pickerInput(
-          inputId = "parallels_selection",
-          label = "Comparison Factor",
-          choices = pickerIp_choice,
-          selected = pickerIp_choice[1],
-          options = list(style = "btn-danger"),
-          width = "100%"
-        ),
-        radioButtons(inputId = "radioB_specifics", 
-               label = "Countries Compared",
-               choices = radioBn_choice,
-               selected = radioBn_choice[1])
-      ),
-
-      mainPanel(
-        width = 8,
-        reactableOutput(outputId = "parallels_reactable")
-      ),
-
-      position = c("left", "right")
-    )
-  })
-
-parallels_graph_server <- function(input, output){
-  parallels_graph_choice <- reactive({
-    if(input$parallels_selection == pickerIp_choice[1]){
-      parallels_graph_code[1]
-    } else if(input$parallels_selection == pickerIp_choice[2]){
-      parallels_graph_code[2]
-    }else{
-      parallels_graph_code[(length(parallels_graph_code))]
-    }
-    
-  })
-  
-  parallels_filtered_data <-
-    reactive({
-      if(input$parallels_selection == pickerIp_choice[1]){
-        parallels_graph_choice() %>% 
-          filter(Entity %in% input$radioB_specifics) %>% 
-          reactable(.)
-      } else if(input$parallels_selection == pickerIp_choice[2]){
-        parallels_graph_choice() %>% 
-          filter(Entity %in% input$radioB_specifics) %>% 
-          reactable(.)
-      }
-      else {
-        print("End")
-      }
-    })
-  
-  
-  output$parallels_reactable <-
-    parallels_filtered_data()
-
-}
-
-shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
+# shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ```
 
