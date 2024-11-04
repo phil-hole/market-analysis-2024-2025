@@ -146,7 +146,7 @@ dsets <-
 
 <!-- DEFINITIONS SECTION -->
 
-## Definitions and Graph {data-width="400"}
+## Definitions and Graph {data-width="450"}
 
 ### **Research Question and Definitions**
 
@@ -185,7 +185,7 @@ collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE,
 
 <!-- ANALYSIS METHODS SECTION -->
 
-## Analysis Methods {data-width="600"}
+## Analysis Methods {data-width="550"}
 
 <!-- PREMISES TO INFERENCE SUBSECTION -->
 
@@ -195,24 +195,23 @@ collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE,
 
 ##### **Premises to Inference**
 
-The purpose of this section is to state the principles behind our statistical inference. 
+The purpose of this section is to state the principles followed in the present statistical inference. 
 In order to treat the data as objectively as possible, specific behaviours and procedures 
-were followed in regards to the making of the report. Our aim is limiting bias and
+were followed in regards to the making of the report, with the aim of limiting bias and
 presenting information through truthful representations.
 
-In order to achieve reliable conclusions, we must conform to a rigid information 
-selection process, in accordance with the following principles:
+In order to achieve reliable conclusions, a rigid information selection process was adhered to, in accordance with the following principles:
 
 - Pertaining to quantitative information and assessing qualitative sources with
 care.
 - Thoroughly checking the validity, completeness and accessibility of the
 information gathered online.
-- Since our data is primarily secondary, ensuring that the external sources
+- Since the data employed is primarily secondary, ensuring that the external sources
   from which we collect data are reliable.
   - Information mainly gathered from Eurostat (Passport data) and OurWorldinData.
 
 Additionally, to avoid indirect manipulation of the data, much care was placed in
-choosing the kinds of graphical representations added to the report. Moreso, our 
+choosing the kinds of graphical representations added to the report. Moreso, the 
 analysis was founded upon standardised values so as to guarantee truthful trends
 evolving coherently  to specified indexes. 
 
@@ -222,7 +221,7 @@ evolving coherently  to specified indexes.
 
 ##### **Challenges Faced**
 
-Throughout the analysis, we incurred in a series of problems that complicated our
+Throughout the analysis, a series of problems were incurred that complicated 
 operations. It is to be expected that a research on a topic as expansive as a
 market leads to fragmented conclusions or unsatisfactory outcomes. Some issues
 faced were:
@@ -237,20 +236,19 @@ faced were:
 
 ##### **Overcoming Challenges**
 
-To face the set of complications mentioned previously, our initial approach was 
-to evaluate the quality of our available sources. A consideration we had to make
-regarded using data with no adjacent studies, which deprived us of the possibility of 
-performing any kind of cross-analysis. Moreso, in situations where varied sources
-would conflict, we would resort to addressing only the most reliable of those 
-considered, following a form of hierarchy of information quality. The aforementioned 
+To face the set of complications mentioned previously, the initial approach was 
+to evaluate the quality of our available sources. A debatable consideration made
+regarded using data with no adjacent studies, which lacked the possibility of 
+performing any kind of cross-analysis. Additionally, in situations where varied sources
+would conflict, the chosen solution was to address only the most reliable of those 
+in contention, following a form of hierarchy of information quality. The aforementioned 
 order would peak with governmental-linked information, followed up by trustworthy 
-data providers. In total, we attempted to:
+data providers. Generally speaking:
 
-- Contact the company to obtain relevant information.
+- Contacting the company to obtain relevant information.
   - Resorting to a brand analysis for lack of response and of alternatives.
 - Cross-referencing information sources.
-- Attainment at a strict data evaluation hierarchy. 
-
+- Attaining at a strict data evaluation hierarchy. 
 
 
 
@@ -266,14 +264,13 @@ data providers. In total, we attempted to:
 
 ### **Demographic Data**
 
-The primary element to consider when trying to understand Portuguese society is 
-population. Data from the past 200 years shows a exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Important to mention is the period of general peace following the Second World War, as contexts offering stability and security favour demographic growth.
+The primary element to consider when trying to understand Portuguese society is population. Data from the past 200 years shows an exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Also important to mention is the period of general peace that followed the Second World War, as contexts offering stability and security favour demographic growth. Such a trend is mirrored by population density, analysing this statistic in the same time span, a common fluctuating trend prevails. In the second half of the 1960s though, a change in tendency is visible, and can be associated to a mass emigration following the rise of the Estado Novo dictatorship. 
 
-Another relevant information regards that of population density. Analysing this statistic in the same timespan, we notice a  fluctuating trend common throughout the entire 
- 
-  
-   
-    
+Another demographic value to take into account is life expectancy, and it is noticeable that it dramatically increases following the end of the Second World War, as to be expected, suffering small dips as part of a fluctuating growth. 
+
+In addition, a focus on immigration was provided to put into perspective the magnitude of foreigner influx into the nation. Regarding this latter point, a variation in trend occurs in concomitance with the 2008 global financial crisis, and can be explained by an adoption of more restrictive immigration policies in Portugal. 
+
+<br>
 
 ```{r PORTUGAL DEMOGRAPHICS}
 #CREATION OF CLEAN POPULATION, POPULATION DENSITY, LIFE EXPECTANCY, IMMIGRATION STOCK DATASETS
@@ -284,9 +281,20 @@ clean_population <-
   rename(`Population` = Population..historical.) %>% 
   hchart("line", hcaes(`Year`, `Population`)) %>% 
   hc_title(text = "Portuguese Population") %>% 
-  hc_yAxis(title=list(text="<b>Population</b>", align="middle")) %>% 
-  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
   lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Population</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
@@ -303,9 +311,9 @@ clean_population_density <-
   rename(`Population Density` = Population.density) %>% 
   hchart("line", hcaes(`Year`, `Population Density`)) %>% 
   hc_title(text = "Portuguese Population Density") %>% 
+  lnplot_custom(.) %>% 
   hc_yAxis(title = list(text = "<b>Population Density</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
-  lnplot_custom(.) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
@@ -321,9 +329,20 @@ clean_immigration <-
   rename(`International Immigrants` = Total.number.of.international.immigrants)%>% 
   hchart("line", hcaes(`Year`, `International Immigrants`)) %>% 
   hc_title(text = "Portuguese International Immigrants") %>% 
-  hc_yAxis(title = list(text = "<b>N° Immigrants</b>", align = "middle")) %>% 
-  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
+  hc_yAxis(title = list(text = "<b>N° Immigrants</b>", align = "middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+      ) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
@@ -339,9 +358,9 @@ clean_life_expectancy <-
   rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0) %>% 
   hchart("line", hcaes(`Year`, `Life Expectancy`)) %>% 
   hc_title(text = "Portuguese Life Expectancy") %>% 
+  lnplot_custom(.) %>% 
   hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
-  lnplot_custom(.) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
@@ -397,9 +416,11 @@ shinyApp(ui = pop_graph_ui, server = pop_graph_server)
 
 <!-- TAB 2 HEALTH -->
 
-### **Portuguese General Health**
+### **General Health**
 
-filler
+The graph suggests a consistent upward linear trend in life expectancy and can be divided into three main sections. The first section (1940 to 1950) is the most unstable one, the life expectancy dropping from 52 to 47 years, in 1943, before rising again until 56 years. The second section (1950 to 1970) presents some fluctuations but overall, an upward movement, indicating slow increases despite minor volatility. The third and last section (1970 to present days) is characterized by a steady linear growth without any significant fluctuation.
+
+During the 20th century a large number of regulations have been implemented to improve the health system and reduce mortality. Key initiatives include investments made in the health infrastructures to enhance care quality, an efficient vaccination program to control infection diseases, the access to health services is guaranteed to everyone, but also international collaborations have helped these improvements. Generally speaking, these efforts have contributed to the overall rise of the life expectancy trend.
 
 ```{r PORTUGAL HEALTH}
 clean_calorie_intake <-
@@ -497,10 +518,21 @@ clean_gdp_capita <-
   select(-Code, -Entity) %>% 
   rename(`GDP per capita` = GDP.per.capita..PPP..constant.2017.international...) %>% 
   hchart("line", hcaes(`Year`, `GDP per capita`)) %>% 
-  hc_title(text = "Portuguese GDP per Capita") %>% 
-  hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle")) %>% 
-  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
+  hc_title(text = "Portuguese GDP per Capita") %>% 
+  hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+           ) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
@@ -589,6 +621,20 @@ wealth_graph_server <- function(input, output){
 shinyApp(ui = wealth_graph_ui, server = wealth_graph_server)
 ```
 
+<!-- TAB 4 INTERPRETATION -->
+
+### **Interpretation**
+
+To favour the interpretation of data, it is necessary to highlight and subdivide Portuguese development into three distinct time periods, namely before 1970, between 1970 and 2014, from 2014 to the present day.
+The first is characterised by an underdeveloped economy, with agriculture as its main factor, and low structural change attributable to low industrialisation of the corporate and the absence of a solid financial sector to sustain investment. 
+
+The second presents an important historical event, the Carnation revolution of 1974, in which the governmental control of Portugal changed from the dictatorship of Estado Novo to a newly established, democratic government. This new inclusive institution favoured the structural development of Portugal, notably with an agrarian reform and its integration in the European Union. By accessing the EU single market, the country was able to extend its commercial reach and, through growing exports, gradually increase its capital endowment and begin catching up to other, more advanced member states.
+
+The third and final subsection can be understood as a period of economic and social reforms, regulation that allowed Portugal to assert its position within the EU. The economy dramatically expanded to accommodate a growing tourism sector and a incremental demand for local goods, with both the government and the corporate sector undertaking financial investments locally and abroad to access new markets. 
+
+Other important facts to mention are the implementation of careful immigration policies, the dramatic improvement of healthcare quality both in technology and in services, and the outlining of the Portuguese education system in Law 46/1986, which in their own way equally contributed to the trends observed in the previous representations.
+
+
 <!-- PARALLELS SECTION -->
 
 ## Parallels{data-width = "450"}
@@ -604,7 +650,7 @@ radioBn_choice <- c("Portugal", "Italy", "Spain")
 
 parallels_population <-
   dsets[["portugal_population_growth_rate"]] %>%
-  filter(Year >= 1950 & Entity %in% radioBn_choice) %>%
+  filter(Year >= 1950 & Entity %in% radioBn_choice & Year <= 2023) %>%
   select(-Code) %>%
   rename(`Population` = Population.growth.rate)
 
@@ -639,7 +685,7 @@ parallels_graph_ui <-
           options = list(style = "btn-danger"),
           width = "100%"
         ),
-        checkboxGroupButtons(inputId = "radioB_specifics",
+        radioButtons(inputId = "radioB_specifics",
                label = "Countries Compared",
                choices = radioBn_choice,
                selected = radioBn_choice[1])
@@ -693,7 +739,7 @@ parallels_graph_server <- function(input, output){
           hc_tooltip(.,
            headerFormat = "",
            pointFormat =
-             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.f}%") %>%
+             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.2f}%") %>%
           hc_caption(
             text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>"
           )
