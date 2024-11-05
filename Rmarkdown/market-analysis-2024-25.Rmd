@@ -264,9 +264,9 @@ data providers. Generally speaking:
 
 ### **Demographic Data**
 
-The primary element to consider when trying to understand Portuguese society is population. Data from the past 200 years shows an exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Also important to mention is the period of general peace that followed the Second World War, as contexts offering stability and security favour demographic growth. Such a trend is mirrored by population density, analysing this statistic in the same time span, a common fluctuating trend prevails. In the second half of the 1960s though, a change in tendency is visible, and can be associated to a mass emigration following the rise of the Estado Novo dictatorship. 
+The primary element to consider when trying to understand Portuguese society is population. Data from the past 200 years shows an exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Also important to mention is the period of general peace that followed the Second World War, as contexts offering stability and security favour demographic growth. 
 
-Another demographic value to take into account is life expectancy, and it is noticeable that it dramatically increases following the end of the Second World War, as to be expected, suffering small dips as part of a fluctuating growth. 
+Such a trend is mirrored by population density, analysing this statistic in the same time span, a common fluctuating trend prevails. In the second half of the 1960s though, a change in tendency is visible, and can be associated to a mass emigration following the rise of the Estado Novo dictatorship. 
 
 In addition, a focus on immigration was provided to put into perspective the magnitude of foreigner influx into the nation. Regarding this latter point, a variation in trend occurs in concomitance with the 2008 global financial crisis, and can be explained by an adoption of more restrictive immigration policies in Portugal. 
 
@@ -282,7 +282,7 @@ clean_population <-
   hchart("line", hcaes(`Year`, `Population`)) %>% 
   hc_title(text = "Portuguese Population") %>% 
   lnplot_custom(.) %>% 
-  hc_yAxis(title=list(text="<b>Population</b>", align="middle"),
+  hc_yAxis(title=list(text="<b>Population [inhab]</b>", align="middle"),
            labels = list(
                       formatter = JS("function() {
                           if (this.value >= 1000000) {
@@ -300,7 +300,8 @@ clean_population <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population: {point.y:.f} inhab") %>% 
   hc_caption(
-    text = "<b>Population</b> = number of inhabitants of a country, at any given year."
+    text = "<b>Population</b> = number of inhabitants of a country, at any given year.",
+    style = list(marginTop = "0px")
   )
   
   
@@ -312,14 +313,15 @@ clean_population_density <-
   hchart("line", hcaes(`Year`, `Population Density`)) %>% 
   hc_title(text = "Portuguese Population Density") %>% 
   lnplot_custom(.) %>% 
-  hc_yAxis(title = list(text = "<b>Population Density</b>", align = "middle")) %>% 
+  hc_yAxis(title = list(text = "<b>Population Density [inhab/kmsq]</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population Density: {point.y:.1f} inhab/kmsq") %>% 
   hc_caption(
-    text = "<b>Population Density</b> = population per square kilometer by country."
+    text = "<b>Population Density</b> = population per square kilometer by country.",
+    style = list(marginTop = "0px")
   )
 
 clean_immigration <-
@@ -330,7 +332,7 @@ clean_immigration <-
   hchart("line", hcaes(`Year`, `International Immigrants`)) %>% 
   hc_title(text = "Portuguese International Immigrants") %>% 
   lnplot_custom(.) %>% 
-  hc_yAxis(title = list(text = "<b>N° Immigrants</b>", align = "middle"),
+  hc_yAxis(title = list(text = "<b>N° Immigrants [inhab]</b>", align = "middle"),
            labels = list(
                       formatter = JS("function() {
                           if (this.value >= 1000000) {
@@ -348,32 +350,14 @@ clean_immigration <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Immigrant Stock: {point.y:.f} inhab") %>% 
      hc_caption(
-    text = "<b>International Immigration Stock</b> = people living in a given country who were born in another country, recorded at mid-year by age and sex and by region, country or area of destination."
-  )
-
-clean_life_expectancy <-
-  dsets[["portugal_life_expectancy"]] %>% 
-  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
-  select(-Code, -Entity) %>% 
-  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0) %>% 
-  hchart("line", hcaes(`Year`, `Life Expectancy`)) %>% 
-  hc_title(text = "Portuguese Life Expectancy") %>% 
-  lnplot_custom(.) %>% 
-  hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>% 
-  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
-  hc_tooltip(., 
-       headerFormat = "",
-       pointFormat = 
-         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>% 
-   hc_caption(
-    text = "<b>Life Expectancy</b> = metric that summarizes death rates across all age groups in one particular year.
-"
+    text = "<b>International Immigration Stock</b> = people living in a given country who were born in another country, recorded at mid-year by age and sex and by region, country or area of destination.",
+    style = list(marginTop = "0px")
   )
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #UI AND SERVER LOGIC
-pop_graph_choice <- c('Population', 'Population Density', 'Life Expectancy', 'International Immigrants')
-pop_graph_code <- list(clean_population, clean_population_density, clean_life_expectancy, clean_immigration)
+pop_graph_choice <- c('Population', 'Population Density', 'International Immigrants')
+pop_graph_code <- list(clean_population, clean_population_density, clean_immigration)
 
 pop_graph_ui <-
   fluidPage({
@@ -417,20 +401,42 @@ shinyApp(ui = pop_graph_ui, server = pop_graph_server)
 <!-- TAB 2 HEALTH -->
 
 ### **General Health**
+Another demographic value to take into account is life expectancy, and it is noticeable that it dramatically increases following the end of the Second World War, as to be expected, suffering small dips as part of a fluctuating growth. 
 
 The graph suggests a consistent upward linear trend in life expectancy and can be divided into three main sections. The first section (1940 to 1950) is the most unstable one, the life expectancy dropping from 52 to 47 years, in 1943, before rising again until 56 years. The second section (1950 to 1970) presents some fluctuations but overall, an upward movement, indicating slow increases despite minor volatility. The third and last section (1970 to present days) is characterized by a steady linear growth without any significant fluctuation.
 
 During the 20th century a large number of regulations have been implemented to improve the health system and reduce mortality. Key initiatives include investments made in the health infrastructures to enhance care quality, an efficient vaccination program to control infection diseases, the access to health services is guaranteed to everyone, but also international collaborations have helped these improvements. Generally speaking, these efforts have contributed to the overall rise of the life expectancy trend.
 
+<br>
+
 ```{r PORTUGAL HEALTH}
+clean_life_expectancy <-
+  dsets[["portugal_life_expectancy"]] %>% 
+  filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Life Expectancy` = Period.life.expectancy.at.birth...Sex..all...Age..0) %>% 
+  hchart("line", hcaes(`Year`, `Life Expectancy`)) %>% 
+  hc_title(text = "Portuguese Life Expectancy") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title = list(text = "<b>Life Expectancy  [yrs]</b>", align = "middle")) %>% 
+  hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>% 
+   hc_caption(
+    text = "<b>Life Expectancy</b> = metric that summarizes death rates across all age groups in one particular year.",
+    style = list(marginTop = "0px")
+  )
+
 clean_calorie_intake <-
   dsets[["portugal_daily_caloric_supply"]] %>% 
   filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
   select(-Code, -Entity) %>% 
   rename(`Daily Calorie Supply` = Daily.calorie.supply.per.person) %>% 
   hchart("line", hcaes(`Year`, `Daily Calorie Supply`)) %>% 
-  hc_title(text = "Portuguese Daily Calorie Intake") %>% 
-  hc_yAxis(title = list(text = "<b>Average Daily Calorie Intake</b>", align = "middle")) %>% 
+  hc_title(text = "Portuguese Daily Calorie Supply") %>% 
+  hc_yAxis(title = list(text = "<b>Average Daily Calorie Supply [kcal]</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
   hc_tooltip(., 
@@ -438,18 +444,19 @@ clean_calorie_intake <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Average Daily Calorie Intake: {point.y:.1f} kcal") %>% 
   hc_caption(
-    text = "<b>Per Capita Daily Calorie Supply</b> = amount of calories available to an average person, not   necessarily the calories actually consumed by that person."
+    text = "<b>Per Capita Daily Calorie Supply</b> = amount of calories available to an average person, not   necessarily the calories actually consumed by that person.",
+    style = list(marginTop = "0px")
   )
   
 clean_obesity_rate <-
-  dsets[["portugal_overweight_adults"]] %>% 
+  dsets[["portugal_overweight_adults"]]%>% 
   filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
   select(-Code, -Entity) %>% 
   rename(`Overweight Share of Adults` =
-           Share.of.adults.who.are.overweight..age.standardized....Sex..both.sexes...Age.group..18...years) %>% 
+           Prevalence.of.obesity.among.adults..BMI....30..crude.estimate........Sex..both.sexes...Age.group..18...years) %>% 
   hchart("line", hcaes(`Year`, `Overweight Share of Adults`)) %>% 
   hc_title(text = "Portuguese Obesity Rate") %>% 
-  hc_yAxis(title = list(text = "<b>Obesity Rate</b>", align = "middle")) %>% 
+  hc_yAxis(title = list(text = "<b>Obesity Rate [%]</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
   hc_tooltip(., 
@@ -457,13 +464,14 @@ clean_obesity_rate <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Obesity Rate: {point.y:.1f}%") %>% 
   hc_caption(
-    text = "<b>Obesity Rate</b> = percentage of adults aged 18+ years with a body mass index (BMI) of 25 kg/m2 or higher."
+    text = "<b>Obesity Rate</b> = percentage of adults aged 18+ years with a body mass index (BMI) of 30 kg/m2 or higher.",
+    style = list(marginTop = "0px")
   )
   
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #UI AND SERVER LOGIC
-health_graph_choice <- c('Daily Calorie Intake', 'Obesity Rate')
-health_graph_code <- list(clean_calorie_intake, clean_obesity_rate)
+health_graph_choice <- c('Life Expectancy', 'Daily Calorie Intake', 'Obesity Rate')
+health_graph_code <- list(clean_life_expectancy, clean_calorie_intake, clean_obesity_rate)
 
 health_graph_ui <-
   fluidPage({
@@ -520,7 +528,7 @@ clean_gdp_capita <-
   hchart("line", hcaes(`Year`, `GDP per capita`)) %>% 
   lnplot_custom(.) %>% 
   hc_title(text = "Portuguese GDP per Capita") %>% 
-  hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle"),
+  hc_yAxis(title = list(text = "<b>GDP per Capita [int $/inhab]</b>", align = "middle"),
            labels = list(
                       formatter = JS("function() {
                           if (this.value >= 1000000) {
@@ -538,7 +546,8 @@ clean_gdp_capita <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per capita: {point.y:.f} $/inhab") %>% 
   hc_caption(
-    text = "<b>GDP per Capita</b> = gross domestic product converted to international dollars using purchasing power parity rates, put into relation with population size."
+    text = "<b>GDP per Capita</b> = gross domestic product converted to international dollars using purchasing power parity rates, put into relation with population size.",
+    style = list(marginTop = "0px")
   )
 
 clean_hdi <-
@@ -556,7 +565,8 @@ clean_hdi <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>HDI: {point.y:.f}") %>% 
   hc_caption(
-    text = "<b>Human Development Index</b> = summary measure of key dimensions of human development (e.g. a long and healthy life, a good education, and a decent standard of living)."
+    text = "<b>Human Development Index</b> = summary measure of key dimensions of human development (e.g. a long and healthy life, a good education, and a decent standard of living).",
+    style = list(marginTop = "0px")
   )
 
 clean_poverty_percentage <-
@@ -565,7 +575,7 @@ clean_poverty_percentage <-
   select(-Code, -Entity) %>% 
   rename(`Poverty Ratio` = Poverty.headcount.ratio.at.national.poverty.lines....of.population.) %>% 
   hchart("line", hcaes(`Year`, `Poverty Ratio`)) %>% 
-  hc_title(text = "Portuguese Relative Population Poverty Percentage") %>% 
+  hc_title(text = "Portuguese Relative Population Poverty Percentage [%]") %>% 
   hc_yAxis(title = list(text = "<b>National Poverty Headcount Ratio</b>", align = "middle")) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
@@ -574,7 +584,8 @@ clean_poverty_percentage <-
        pointFormat = 
          "<b>{point.name}</b><br>Year: {point.x:.f}<br>Poverty Percentage: {point.y:.1f}%") %>% 
   hc_caption(
-    text = "<b>National poverty headcount ratio</b> =  percentage of the population living below the national poverty line(s). <br>National estimates are based on population-weighted subgroup estimates from household surveys."
+    text = "<b>National poverty headcount ratio</b> =  percentage of the population living below the national poverty line(s). <br>National estimates are based on population-weighted subgroup estimates from household surveys.",
+    style = list(marginTop = "0px")
   )
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
@@ -650,7 +661,7 @@ radioBn_choice <- c("Portugal", "Italy", "Spain")
 
 parallels_population <-
   dsets[["portugal_population_growth_rate"]] %>%
-  filter(Year >= 1950 & Entity %in% radioBn_choice & Year <= 2023) %>%
+  filter(Year >= 1950 & Entity %in% radioBn_choice) %>%
   select(-Code) %>%
   rename(`Population` = Population.growth.rate)
 
@@ -732,7 +743,7 @@ parallels_graph_server <- function(input, output){
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
           hchart("line", hcaes(`Year`, `Population`)) %>%
           hc_title(text = "Population Growth Rate Comparison") %>%
-          hc_yAxis(title = list(text = "<b>Population Growth Rate</b>", align = "middle")) %>%
+          hc_yAxis(title = list(text = "<b>Population Growth Rate [%]</b>", align = "middle")) %>%
           hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
@@ -741,14 +752,15 @@ parallels_graph_server <- function(input, output){
            pointFormat =
              "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.2f}%") %>%
           hc_caption(
-            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>"
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>",
+            style = list(marginTop = "0px")
           )
       } else if(input$parallels_selection == pickerIp_choice[2]){
         temp %>%
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
           hchart("line", hcaes(`Year`, `Life Expectancy`)) %>%
           hc_title(text = "Life Expectancy Comparison") %>%
-          hc_yAxis(title = list(text = "<b>Life Expectancy</b>", align = "middle")) %>%
+          hc_yAxis(title = list(text = "<b>Life Expectancy [yrs]</b>", align = "middle")) %>%
           hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
@@ -757,14 +769,15 @@ parallels_graph_server <- function(input, output){
            pointFormat =
              "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>%
           hc_caption(
-            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's life expectancy.</b>"
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's life expectancy.</b>",
+            style = list(marginTop = "0px")
           )      }
       else {
         temp %>%
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
           hchart("line", hcaes(`Year`, `GDP per capita`)) %>%
           hc_title(text = "GDP per Capita Comparison") %>%
-          hc_yAxis(title = list(text = "<b>GDP per Capita</b>", align = "middle")) %>%
+          hc_yAxis(title = list(text = "<b>GDP per Capita [int $/inhab]</b>", align = "middle")) %>%
           hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>%
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
@@ -773,7 +786,8 @@ parallels_graph_server <- function(input, output){
            pointFormat =
              "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per Capita: {point.y:.0f} $/inhab") %>%
           hc_caption(
-            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's GDP per capita.</b>"
+            text = "<b>Same scale comparison of Portugal's, Italy's and Spain's GDP per capita.</b>",
+            style = list(marginTop = "0px")
           )
       }
     })
