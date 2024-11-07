@@ -175,7 +175,7 @@ Fruit Snacks, Snack Bars, Sweet Biscuits in Portugal and the strategy of *Vieira
 Index <- 
   data.frame(
     parent = c(rep("Socio-Demographic Analysis", 4), rep("Economic Analysis", 4),                rep("Demand and Supply", 3)),
-    child = c("Population", "Health Factors", "Parallel with Italy and Spain",                  "Wealth Distribution", "General Economic Overview", "Snack Market",               "Vieira de Castro & Filhos Lda.", "Main Market Actors", "Supply and                Demand Fluctuations", "Hypotheticals tied to the good", "Effect of                Externalities")
+    child = c("Population", "Health Factors", "Parallel with Italy and Spain",                  "Portuguese Economy", "General Economic Overview", "Snack Market",               "Vieira de Castro & Filhos Lda.", "Main Market Actors", "Supply and                Demand Fluctuations", "Hypotheticals tied to the good", "Effect of                Externalities")
   )
 
 collapsibleTree(Index, hierarchy = c("parent", "child"), collapsed = FALSE, 
@@ -266,9 +266,9 @@ data providers. Generally speaking:
 
 The primary element to consider when trying to understand Portuguese society is population. Data from the past 200 years shows an exponential demographic increase in the 20th century. This can be explained by a series of factors, namely a general betterment of living conditions in Europe following the industrial revolutions, with the gradual diffusion of better economic, social, political, educational and sanitary conditions in the modern world. Also important to mention is the period of general peace that followed the Second World War, as contexts offering stability and security favour demographic growth. 
 
-Such a trend is mirrored by population density, analysing this statistic in the same time span, a common fluctuating trend prevails. In the second half of the 1960s though, a change in tendency is visible, and can be associated to a mass emigration following the rise of the Estado Novo dictatorship. 
+Such a trend is mirrored by population density. Analysing this statistic in the same time span, a common fluctuating trend can be observed. In the second half of the 1960s though, a change in tendency is visible, and can be associated to a mass emigration following the rise of the Estado Novo dictatorship. 
 
-In addition, a focus on immigration was provided to put into perspective the magnitude of foreigner influx into the nation. Regarding this latter point, a variation in trend occurs in concomitance with the 2008 global financial crisis, and can be explained by an adoption of more restrictive immigration policies in Portugal. 
+In addition, a focus on immigration was provided to put into perspective the magnitude of foreigner influx into the nation. Regarding this point, a variation in trend occurs in concomitance with the 2008 global financial crisis, and can be explained by an adoption of more restrictive immigration policies in Portugal. 
 
 <br>
 
@@ -401,12 +401,12 @@ shinyApp(ui = pop_graph_ui, server = pop_graph_server)
 <!-- TAB 2 HEALTH -->
 
 ### **General Health**
-Another demographic value to take into account is life expectancy, and it is noticeable that it dramatically increases following the end of the Second World War, as to be expected, suffering small dips as part of a fluctuating growth. 
+Considering the nature of the market analysed and its tight relation to primary human needs, an overview of Portuguese general health is compulsory. 
 
-The graph suggests a consistent upward linear trend in life expectancy and can be divided into three main sections. The first section (1940 to 1950) is the most unstable one, the life expectancy dropping from 52 to 47 years, in 1943, before rising again until 56 years. The second section (1950 to 1970) presents some fluctuations but overall, an upward movement, indicating slow increases despite minor volatility. The third and last section (1970 to present days) is characterized by a steady linear growth without any significant fluctuation.
+The first and possibly most important value to take into account is life expectancy. It dramatically increases following the end of the Second World War, as to be expected, suffering small dips as part of a fluctuating growth. The most important takeaway from the relevant data is the presence of gradual yet quasi-constant increase, reducing in volatility with time. A plausible explanation could be the significant number of regulations implemented to improve health systems and national security, namely an efficient vaccination campaign pursued throughout the twentieth century. Together with a global betterment of living conditions, these efforts contributed to the rise of life expectancy. 
 
-During the 20th century a large number of regulations have been implemented to improve the health system and reduce mortality. Key initiatives include investments made in the health infrastructures to enhance care quality, an efficient vaccination program to control infection diseases, the access to health services is guaranteed to everyone, but also international collaborations have helped these improvements. Generally speaking, these efforts have contributed to the overall rise of the life expectancy trend.
-
+The other two datasets represented show respectively the average daily caloric supply available and the percentage of adults suffering from obesity in Portugal. The former presents a sharp divergence from an otherwise growing trend between the late 1970s and 1980s, which can be addressed as a byproduct of a series of economic and social factors, such as the inflationary crisis of the 1970s and growing waves of immigration from ex-African colonies. <br>
+The latter instead, with its quasi-linear growth, can be analysed taking into consideration the former. Despite the average daily caloric supply varying wildly, the trend regarding food overconsumption, or obesity maintains a sharp growth rate, factor that could allow one to suppose a growing availability and consumption of calorie-intensive, economical foods, such as snacks. 
 <br>
 
 ```{r PORTUGAL HEALTH}
@@ -429,7 +429,7 @@ clean_life_expectancy <-
     style = list(marginTop = "0px")
   )
 
-clean_calorie_intake <-
+clean_calorie_supply <-
   dsets[["portugal_daily_caloric_supply"]] %>% 
   filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
   select(-Code, -Entity) %>% 
@@ -442,7 +442,7 @@ clean_calorie_intake <-
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
-         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Average Daily Calorie Intake: {point.y:.1f} kcal") %>% 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Average Daily Calorie Supply: {point.y:.1f} kcal") %>% 
   hc_caption(
     text = "<b>Per Capita Daily Calorie Supply</b> = amount of calories available to an average person, not   necessarily the calories actually consumed by that person.",
     style = list(marginTop = "0px")
@@ -470,8 +470,8 @@ clean_obesity_rate <-
   
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #UI AND SERVER LOGIC
-health_graph_choice <- c('Life Expectancy', 'Daily Calorie Intake', 'Obesity Rate')
-health_graph_code <- list(clean_life_expectancy, clean_calorie_intake, clean_obesity_rate)
+health_graph_choice <- c('Life Expectancy', 'Daily Calorie Supply', 'Obesity Rate')
+health_graph_code <- list(clean_life_expectancy, clean_calorie_supply, clean_obesity_rate)
 
 health_graph_ui <-
   fluidPage({
@@ -514,9 +514,15 @@ shinyApp(ui = health_graph_ui, server = health_graph_server)
 
 <!-- TAB 3 WEALTH -->
 
-### **Wealth Distribution**
+### **Portuguese Economy**
 
-filler
+The final topic to discuss when creating a general picture of Portugal is its economic situation. Having already been mentioned when discussing previous trends, a country’s economy is understandably ever-present in all societal sectors, more so in the functioning of any market, including the one of study.
+
+In order to address how Portugal stands economic-wise, GDP per capita is a decent indicator of average wealth per individual, despite not taking into account wealth distribution. Generally, a growing trend can be observed, any sudden deviation from which occurs in concomitance with global economic crises, like the 2008 banking crisis and the 2020 Covid19 pandemic. Parallelly to the other representations, it signifies a general betterment of living conditions, as the average individual has more attainable wealth.
+To compensate the superficiality of GDP per capita when it comes to many social factors contributing in addressing living standards, the notion of HDI was introduced, which formally expresses the aforementioned trend of growth through a summary indicator, without any significant variation in time. 
+
+Finally, an important yet very recent statistic was included presenting the percentage of population below a fixed “poverty line”, or the ratio of individuals with a “monetary income (per equivalent adult) below EUR 7,095 euros (EUR 591 per month)”. A conclusion that can be drawn from this data is a general reduction of poverty following the introduction of the Euro and, as such, Portugal’s affinity with EU economic regulations. 
+
 
 ```{r PORTUGAL WEALTH}
 #CLEAN GDP PRO CAPITA, HDI DATASETS
@@ -753,8 +759,15 @@ parallels_graph_server <- function(input, output){
              "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.2f}%") %>%
           hc_caption(
             text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>",
-            style = list(marginTop = "0px")
-          )
+            style = list(marginTop = "0px") 
+          ) %>% 
+          hc_plotOptions(
+            line = list(zoneAxis = "x", 
+                        zones = list(list(value = 2023, color = "#db240c"),
+                                     list(color = "#db240c", dashStyle = "Dash")
+                                     )
+                       )
+            )
       } else if(input$parallels_selection == pickerIp_choice[2]){
         temp %>%
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
