@@ -41,7 +41,8 @@ pacman::p_load(
   dygraphs,        #--package for time series model creation
   xts,             #--data format required by dygraphs
   shiny,           #--"runtime: shiny" in JMAL header already loads the library, useful for debugging w/o                       knitting
-  shinyWidgets     #--additional customisation for shiny elements
+  shinyWidgets,    #--additional customisation for shiny elements
+  readxl
 )
 ```
 
@@ -52,6 +53,13 @@ pacman::p_load(
 csv_remove <- 
   function(x){
     substr(x, 1, nchar(x)-4)
+  }
+
+#-----#
+
+xls_remove <- 
+  function(x){
+    substr(x, 1, nchar(x)-5)
   }
 
 #-----#
@@ -131,6 +139,14 @@ dsets <-
     #reading each csv file, same code as dsets w/ exception that it takes full file path rather than just the name
     lapply(dsets, csv_remove)
     #removing ".csv" file extension to create variable list, function above
+  )
+
+statista <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)   #vector with file names
+
+statista <- 
+  setNames(
+    lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_excel),
+    lapply(statista, xls_remove)
   )
 
 #final dsets vector contains variables associated w/ respective dataset:
@@ -826,6 +842,7 @@ shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ###
 filler
 ```{r}
+
 economic_factor_choice <- c("Real GDP", "Real GDP Growth Rate", "Unemployment Rate", "Inflation Rate")
 
 
