@@ -141,12 +141,12 @@ dsets <-
     #removing ".csv" file extension to create variable list, function above
   )
 
-statista <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)   #vector with file names
+xls_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)   #vector with file names
 
-statista <- 
+xls_dsets <- 
   setNames(
     lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_excel),
-    lapply(statista, xls_remove)
+    lapply(xls_dsets, xls_remove)
   )
 
 #final dsets vector contains variables associated w/ respective dataset:
@@ -840,12 +840,243 @@ shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ## General Economic Overview
 
 ###
-filler
-```{r}
-
-economic_factor_choice <- c("Real GDP", "Real GDP Growth Rate", "Unemployment Rate", "Inflation Rate")
 
 
+<br>
+
+```{r ECONOMIC OVERVIEW}
+#CLEAN PARALLELS DATASETS
+economic_factor_choice <- 
+  c("Nominal GDP", "Consumer Price Index", "Real GDP", "Real GDP Growth Rate", "Unemployment Rate", "Inflation Rate")
+
+economics_nom_gdp <-
+  dsets[["portugal_gdp_constant"]] %>% 
+  filter(Entity == "Portugal") %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Nominal GDP` = GDP..constant.2015.US..) 
+
+economics_cpi <-
+  dsets[["portugal_consumer_price_index"]] %>% 
+  filter(Entity == "Portugal") %>% 
+  select(-Code, -Entity) %>% 
+  rename(`Consumer Price Index` = Consumer.price.index..2010...100.)
+  
+
+economics_rgdp <-
+  merge(economics_nom_gdp, economics_cpi, by = "Year") %>% 
+  mutate(`Real GDP` = (`Nominal GDP`/`Consumer Price Index`)*100) %>% 
+  select(Year, `Real GDP`)
+
+economics_rgdp_g_rate <-
+  economics_rgdp %>% 
+  mutate(`Real GDP Growth Rate` = ((`Real GDP` - lag(`Real GDP`)) / lag(`Real GDP`) * 100)) %>% 
+  select(-`Real GDP`) %>% 
+  hchart("line", hcaes(`Year`, `Real GDP Growth Rate`)) %>% 
+  hc_title(text = "Portuguese Real GDP Growth Rate") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Real GDP Growth Rate [%]</b>", align="middle")) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP Growth Rate: {point.y:.1f}%"
+  ) %>% 
+  hc_caption(
+    text = "<b>Real GDP Growth Rate</b> = growth rate of real GDP calculated year by year.",
+    style = list(marginTop = "0px")
+  )
+  
+
+economics_rgdp <-
+  economics_rgdp %>%
+  hchart("line", hcaes(`Year`, `Real GDP`)) %>% 
+  hc_title(text = "Portuguese Real GDP") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Real GDP [int $]</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000000) {
+                            return (this.value/1000000000) + ' bil';
+                          } else if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP: {point.y:,.0f} int $"
+  ) %>% 
+  hc_caption(
+    text = "<b>Real GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, adjusted for constant prices using a deflator, the yearly consumer price index.",
+    style = list(marginTop = "0px")
+  )
+
+economics_nom_gdp <-
+  economics_nom_gdp %>% 
+  hchart("line", hcaes(`Year`, `Nominal GDP`)) %>% 
+  hc_title(text = "Portuguese Nominal GDP") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Nominal GDP [int $]</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000000) {
+                            return (this.value/1000000000) + ' bil';
+                          } else if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Nominal GDP: {point.y:,.0f} int $") %>% 
+  hc_caption(
+    text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
+    style = list(marginTop = "0px")
+  )
+  
+
+economics_cpi <- 
+  economics_cpi %>% 
+  hchart("line", hcaes(`Year`, `Consumer Price Index`)) %>% 
+  hc_title(text = "Portuguese Consumer Price Index") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>CPI</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000000) {
+                            return (this.value/1000000000) + ' bil';
+                          } else if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>CPI: {point.y:.2f}") %>% 
+  hc_caption(
+    text = "<b>Consumer Price Index</b> = average value of a basket containing the most largely used consumption goods and services.<br> Reference Year: 2010",
+    style = list(marginTop = "0px")
+  )
+
+economics_unemployment <-
+  dsets[["portugal_unemployment_rate"]] %>% 
+  select(-Code) %>%
+  filter(Entity == "Portugal") %>% 
+  rename(`Unemployment Rate` = Unemployment..total....of.total.labor.force...modeled.ILO.estimate.) %>%
+  hchart("line", hcaes(`Year`, `Unemployment Rate`)) %>%
+  hc_title(text = "Portuguese Unemployment Rate") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Unemployment Rate [%]</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Unemployment Rate: {point.y:.1f}%") %>% 
+  hc_caption(
+    text = "<b>Unemployment Rate</b> = percentage of the labour force that cannot find occupation within a short time span.",
+    style = list(marginTop = "0px")
+  )
+
+economics_inflation <-
+  dsets[["portugal_inflation"]] %>%
+  select(-Code) %>% 
+  filter(Entity == "Portugal") %>% 
+  rename(`Inflation Rate`= Inflation..consumer.prices..annual...) %>%
+  hchart("line", hcaes(`Year`, `Inflation Rate`)) %>%
+  hc_title(text = "Portuguese Inflation Rate") %>% 
+  lnplot_custom(.) %>% 
+  hc_yAxis(title=list(text="<b>Inflation Rate [%]</b>", align="middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value >= 1000000) {
+                            return (this.value / 1000000) + ' mil';
+                          } else if (this.value >= 1000) {
+                            return (this.value / 1000) + ' k';
+                          }
+                          return this.value;
+                        }")
+                      )
+          ) %>% 
+  hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>% 
+  hc_tooltip(., 
+       headerFormat = "",
+       pointFormat = 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Inflation Rate: {point.y:.1f}%") %>% 
+  hc_caption(
+    text = "<b>Inflation Rate</b> = rate of growth of a price index over time.",
+    style = list(marginTop = "0px")
+  )
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+economics_graph_code <- list(economics_nom_gdp, economics_cpi, economics_rgdp, economics_rgdp_g_rate, economics_unemployment, economics_inflation)
+
+economics_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "economics_selection",
+          label = "General Economic Indicators",
+          choices = economic_factor_choice,
+          selected = economic_factor_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        )
+      ),
+
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "economics_highchart")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+economics_graph_server <- function(input, output){
+  selected <- reactive({
+    economics_graph_code[economic_factor_choice %in% input$economics_selection]
+  })
+
+  output$economics_highchart <-
+    renderHighchart({
+      temp <- selected()
+      temp[[1]]
+    })
+  }
+
+shinyApp(ui = economics_graph_ui, server = economics_graph_server)
 ```
 
 ## Overview of the Snack Market
