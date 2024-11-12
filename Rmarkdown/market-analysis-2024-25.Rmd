@@ -837,12 +837,9 @@ shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 
 <!-- SECTION 1 -->
 
-## General Economic Overview
+## General Economic Overview - Graphs {data-width="425"}
 
 ###
-
-
-<br>
 
 ```{r ECONOMIC OVERVIEW}
 #CLEAN PARALLELS DATASETS
@@ -884,175 +881,6 @@ economics_inflation <-
   filter(Entity == "Portugal") %>%
   rename(`Inflation Rate`= Inflation..consumer.prices..annual...)
 
-# economics_rgdp_g_rate <-
-  # economics_rgdp %>%
-  # mutate(`Real GDP Growth Rate` = ((`Real GDP` - lag(`Real GDP`)) / lag(`Real GDP`) * 100)) %>%
-  # select(-`Real GDP`) %>%
-  # hchart("line", hcaes(`Year`, `Real GDP Growth Rate`)) %>%
-  # hc_title(text = "Portuguese Real GDP Growth Rate") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>Real GDP Growth Rate [%]</b>", align="middle")) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP Growth Rate: {point.y:.1f}%"
-  # ) %>%
-  # hc_caption(
-  #   text = "<b>Real GDP Growth Rate</b> = growth rate of real GDP calculated year by year.",
-  #   style = list(marginTop = "0px")
-  # )
-  
-
-# economics_rgdp <-
-#   economics_rgdp %>%
-  # hchart("line", hcaes(`Year`, `Real GDP`)) %>%
-  # hc_title(text = "Portuguese Real GDP") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>Real GDP [int $]</b>", align="middle"),
-  #          labels = list(
-  #                     formatter = JS("function() {
-  #                         if (this.value >= 1000000000) {
-  #                           return (this.value/1000000000) + ' bil';
-  #                         } else if (this.value >= 1000000) {
-  #                           return (this.value / 1000000) + ' mil';
-  #                         } else if (this.value >= 1000) {
-  #                           return (this.value / 1000) + ' k';
-  #                         }
-  #                         return this.value;
-  #                       }")
-  #                     )
-  #         ) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP: {point.y:,.0f} int $"
-  # ) %>%
-  # hc_caption(
-  #   text = "<b>Real GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, adjusted for constant prices using a deflator, the yearly consumer price index.",
-  #   style = list(marginTop = "0px")
-  # )
-
-# economics_nom_gdp <-
-#   economics_nom_gdp %>% 
-  # hchart("line", hcaes(`Year`, `Nominal GDP`)) %>%
-  # hc_title(text = "Portuguese Nominal GDP") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>Nominal GDP [int $]</b>", align="middle"),
-  #          labels = list(
-  #                     formatter = JS("function() {
-  #                         if (this.value >= 1000000000) {
-  #                           return (this.value/1000000000) + ' bil';
-  #                         } else if (this.value >= 1000000) {
-  #                           return (this.value / 1000000) + ' mil';
-  #                         } else if (this.value >= 1000) {
-  #                           return (this.value / 1000) + ' k';
-  #                         }
-  #                         return this.value;
-  #                       }")
-  #                     )
-  #         ) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>Nominal GDP: {point.y:,.0f} int $") %>%
-  # hc_caption(
-  #   text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
-  #   style = list(marginTop = "0px")
-  # )
-  
-
-# economics_cpi <- 
-#   economics_cpi %>% 
-  # hchart("line", hcaes(`Year`, `Consumer Price Index`)) %>%
-  # hc_title(text = "Portuguese Consumer Price Index") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>CPI</b>", align="middle"),
-  #          labels = list(
-  #                     formatter = JS("function() {
-  #                         if (this.value >= 1000000000) {
-  #                           return (this.value/1000000000) + ' bil';
-  #                         } else if (this.value >= 1000000) {
-  #                           return (this.value / 1000000) + ' mil';
-  #                         } else if (this.value >= 1000) {
-  #                           return (this.value / 1000) + ' k';
-  #                         }
-  #                         return this.value;
-  #                       }")
-  #                     )
-  #         ) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>CPI: {point.y:.2f}") %>%
-  # hc_caption(
-  #   text = "<b>Consumer Price Index</b> = average value of a basket containing the most largely used consumption goods and services.<br> Reference Year: 2010",
-  #   style = list(marginTop = "0px")
-  # )
-
-# economics_unemployment <-
-#   dsets[["portugal_unemployment_rate"]] %>% 
-#   select(-Code) %>%
-#   filter(Entity == "Portugal") %>% 
-#   rename(`Unemployment Rate` = Unemployment..total....of.total.labor.force...modeled.ILO.estimate.) %>%
-  # hchart("line", hcaes(`Year`, `Unemployment Rate`)) %>%
-  # hc_title(text = "Portuguese Unemployment Rate") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>Unemployment Rate [%]</b>", align="middle"),
-  #          labels = list(
-  #                     formatter = JS("function() {
-  #                         if (this.value >= 1000000) {
-  #                           return (this.value / 1000000) + ' mil';
-  #                         } else if (this.value >= 1000) {
-  #                           return (this.value / 1000) + ' k';
-  #                         }
-  #                         return this.value;
-  #                       }")
-  #                     )
-  #         ) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>Unemployment Rate: {point.y:.1f}%") %>%
-  # hc_caption(
-  #   text = "<b>Unemployment Rate</b> = percentage of the labour force that cannot find occupation within a short time span.",
-  #   style = list(marginTop = "0px")
-  # )
-
-# economics_inflation <-
-#   dsets[["portugal_inflation"]] %>%
-#   select(-Code) %>%
-#   filter(Entity == "Portugal") %>%
-#   rename(`Inflation Rate`= Inflation..consumer.prices..annual...) %>%
-  # hchart("line", hcaes(`Year`, `Inflation Rate`)) %>%
-  # hc_title(text = "Portuguese Inflation Rate") %>%
-  # lnplot_custom(.) %>%
-  # hc_yAxis(title=list(text="<b>Inflation Rate [%]</b>", align="middle"),
-  #          labels = list(
-  #                     formatter = JS("function() {
-  #                         if (this.value >= 1000000) {
-  #                           return (this.value / 1000000) + ' mil';
-  #                         } else if (this.value >= 1000) {
-  #                           return (this.value / 1000) + ' k';
-  #                         }
-  #                         return this.value;
-  #                       }")
-  #                     )
-  #         ) %>%
-  # hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
-  # hc_tooltip(.,
-  #      headerFormat = "",
-  #      pointFormat =
-  #        "<b>{point.name}</b><br>Year: {point.x:.f}<br>Inflation Rate: {point.y:.1f}%") %>%
-  # hc_caption(
-  #   text = "<b>Inflation Rate</b> = rate of growth of a price index over time.",
-  #   style = list(marginTop = "0px")
-  # )
-
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #UI AND SERVER LOGIC
 economics_graph_code <- list(economics_nom_gdp, economics_cpi, economics_rgdp, economics_rgdp_g_rate, economics_unemployment, economics_inflation)
@@ -1070,20 +898,16 @@ economics_graph_ui <-
           options = list(style = "btn-danger"),
           width = "100%"
         ),
+        chooseSliderSkin("Flat", color = '#db240c'),
         sliderInput(inputId = "economics_year_slider",
                     label = "Year Interval",
                     min = 1960,
                     max = 2023,
                     value = c(1960, 2023),
                     step = 1,
-                    dragRange = TRUE#,
-                    # animate = list(
-                    #   interval = 2000,         # Milliseconds between steps
-                    #   loop = FALSE,            # Whether the animation loops back to start
-                    #   playButton = "<br>▶",  # Custom text for the play button
-                    #   pauseButton = "<br>⏸ " # Custom text for the pause button
-                    # )
-                   )
+                    sep = "",
+                    dragRange = TRUE
+                    )
       ),
 
       mainPanel(
@@ -1250,13 +1074,42 @@ economics_graph_server <- function(input, output){
 shinyApp(ui = economics_graph_ui, server = economics_graph_server)
 ```
 
-## Overview of the Snack Market
+## General Economic Overview - Text
 
-###
+### **Nominal GDP and Consumer Price Index**
+
 sitography:
 https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
+<br>
+
+### **Real GDP and Real GDP Growth Rate**
+
+In order to address how Portugal stands economic-wise, GDP per capita is a decent indicator of average wealth per individual, despite not taking into account wealth distribution. Generally, a growing trend can be observed, any sudden deviation from which occurs in concomitance with global economic crises, like the 2008 banking crisis and the 2020 Covid19 pandemic. Parallelly to the other representations, it signifies a general betterment of living conditions, as the average individual has more attainable wealth.
+To compensate the superficiality of GDP per capita when it comes to many social factors contributing in addressing living standards, the notion of HDI was introduced, which formally expresses the aforementioned trend of growth through a summary indicator, without any significant variation in time. 
+
+<br>
+
+### **Unemployment and Inflation Rates**
+
+filler
+
+<br>
+
+
+# Snack Market
+
+## Supply Side
+
+### **Supply**
+
+####
+
+filler
+
 ```{r}
+2+2
+
 # graph_ui <-
 #   fluidPage({
 #     sidebarLayout(
@@ -1295,10 +1148,18 @@ https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 #       
 # shinyApp(ui = graph_ui, server = graph_server)
 ```
+ 
+## Demand Side
 
+### **Demand**
 
+####
 
+filler
 
+```{r}
+3+3
+```
 
 
 
