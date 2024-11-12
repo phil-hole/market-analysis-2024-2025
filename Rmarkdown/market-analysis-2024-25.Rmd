@@ -141,13 +141,13 @@ dsets <-
     #removing ".csv" file extension to create variable list, function above
   )
 
-xls_dsets <- list.files(path="./Datasets", pattern = "*.xls", full.names = FALSE)   #vector with file names
-
-xls_dsets <- 
-  setNames(
-    lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_xls),
-    lapply(xls_dsets, xls_remove)
-  )
+# xls_dsets <- list.files(path="./Datasets", pattern = "*.xls", full.names = FALSE)   #vector with file names
+# 
+# xls_dsets <- 
+#   setNames(
+#     lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_xls),
+#     lapply(xls_dsets, xls_remove)
+#   )
 
 #final dsets vector contains variables associated w/ respective dataset:
 #-global edits done to reduce variable names, since discarded data not required.
@@ -894,7 +894,7 @@ economics_graph_ui <-
           inputId = "economics_selection",
           label = "General Economic Indicators",
           choices = economic_factor_choice,
-          selected = economic_factor_choice[1],
+          selected = economic_factor_choice[3],
           options = list(style = "btn-danger"),
           width = "100%"
         ),
@@ -903,7 +903,7 @@ economics_graph_ui <-
                     label = "Year Interval",
                     min = 1960,
                     max = 2023,
-                    value = c(1960, 2023),
+                    value = c(1990, 2023),
                     step = 1,
                     sep = "",
                     dragRange = TRUE
@@ -1076,25 +1076,21 @@ shinyApp(ui = economics_graph_ui, server = economics_graph_server)
 
 ## General Economic Overview - Text
 
-### **Nominal GDP and Consumer Price Index**
-
-sitography:
-https://www.geeksforgeeks.org/if-else-if-statement-in-r/
-
-<br>
-
 ### **Real GDP and Real GDP Growth Rate**
 
-In order to address how Portugal stands economic-wise, GDP per capita is a decent indicator of average wealth per individual, despite not taking into account wealth distribution. Generally, a growing trend can be observed, any sudden deviation from which occurs in concomitance with global economic crises, like the 2008 banking crisis and the 2020 Covid19 pandemic. Parallelly to the other representations, it signifies a general betterment of living conditions, as the average individual has more attainable wealth.
-To compensate the superficiality of GDP per capita when it comes to many social factors contributing in addressing living standards, the notion of HDI was introduced, which formally expresses the aforementioned trend of growth through a summary indicator, without any significant variation in time. 
+The starting point of this section is real GDP and its growth rate. Per definition, this notion quantifies the output of a nation unrelated to price variation, so the aggregate value added by the corporate sector through production, in a set time span. 
+Referring to the graph provided, a general upward trend can be observed, reflecting an overall robust economic growth through time. Nonetheless, different phases stand out in function of a varying growth rate, notably one of rapid expansion in the late 20th century and one of stabilisation in the current era. Some hypotheses that justify this variation in speed of growth may be rapid industrialisation, expansion of the tertiary sector and integration into the EU, which all in their own way influenced the economic management of the country. Additionally, periods of stagnation and contraction stand out in concomitance with other previously mentioned global externalities like the COVID19 pandemic. 
 
-<br>
+### **Unemployment Rate**
 
-### **Unemployment and Inflation Rates**
+A second focal point to cover when trying to understand Portugal’s economic situation is the rate of unemployment. GDP growth and employment go hand in hand, as job creation is fuelled by the former, despite being a factor in its development. 
+Looking into the unemployment rate, or the percentage of the labour force remaining unemployed after a set time, a stable trend emerges, settling between 5% and 10%, up until the 2008-2014 financial market crisis. In this instance, it soared to 16%, only to then settle back in the previous range and later suffer a similar change during the global pandemic. Most recently, current estimates show a rapid rebound of labour participation in 2022 indicating a recovery period, symbol of a growing confidence in the Portuguese job market. Increases in this period can be associated to mismatches between labour demand and supply, either founded on skill requirements or on regional disparities. 
 
-filler
+### **Inflation Rate and Consumer Price Index**
 
-<br>
+The final indicator to take into account is inflation. Despite representing GDP in constant prices and drawing conclusions unrelated to said characteristic’s variation, it remains essential to consider particularly due to its non-linear relationship with unemployment. To truly assess Portugal’s economic standing and relate it to general wellbeing, an analysis on said grounds is unavoidable. 
+Inflation, being the growth rate of the consumer price index, is indicative of the variation in price of consumption goods. Referring to the visualisation offered, an outlier stands out in concomitance with the 1970s stagflation event, which raised inflation and unemployment rates globally. Outside this volatile period though, the trend was generally stable, settling between 2% and 3%, due to the application of stabilising economic policies, namely in the Eurozone territory. Another period worth to mention is between 2020 and 2022, where conditions such as the pandemic and geopolitical tensions (particularly due to the Russo-Ukrainian conflict) caused general supply chain disruptions and price fluctuations due to scarcity. 
+
 
 
 # Snack Market
@@ -1105,7 +1101,8 @@ filler
 
 ####
 
-filler
+sitography:
+https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
 ```{r}
 2+2
