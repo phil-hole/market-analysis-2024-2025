@@ -59,7 +59,7 @@ csv_remove <-
 
 xls_remove <- 
   function(x){
-    substr(x, 1, nchar(x)-5)
+    substr(x, 1, nchar(x)-4)
   }
 
 #-----#
@@ -145,7 +145,7 @@ xls_dsets <- list.files(path="./Datasets", pattern = "*.xls", full.names = FALSE
 
 xls_dsets <- 
   setNames(
-    lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_excel),
+    lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_xls),
     lapply(xls_dsets, xls_remove)
   )
 
