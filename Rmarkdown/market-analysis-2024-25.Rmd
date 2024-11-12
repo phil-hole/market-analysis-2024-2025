@@ -141,11 +141,11 @@ dsets <-
     #removing ".csv" file extension to create variable list, function above
   )
 
-xls_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)   #vector with file names
+xls_dsets <- list.files(path="./Datasets", pattern = "*.xls", full.names = FALSE)   #vector with file names
 
 xls_dsets <- 
   setNames(
-    lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_excel),
+    lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_excel),
     lapply(xls_dsets, xls_remove)
   )
 
