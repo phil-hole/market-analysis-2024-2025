@@ -12,6 +12,12 @@ runtime: shiny
 ---
 <!-- theme alternatives: "cerulean",  "journal", "readable", "simplex", "united", "yeti" -->
 
+<style>
+  body {
+    text-align: justify;
+  }
+</style>
+
 ```{r SETUP, message=FALSE, include=FALSE}
 #GENERAL CODE CHUNK SETUP
 knitr::opts_chunk$set(echo = FALSE, message=FALSE)
@@ -50,14 +56,7 @@ pacman::p_load(
 ```{r FUNCTIONS & DATA IMPORTING, message=FALSE, include=FALSE}
 #FUNCTIONS
 #-".csv" extension remover, for variable list
-csv_remove <- 
-  function(x){
-    substr(x, 1, nchar(x)-4)
-  }
-
-#-----#
-
-xls_remove <- 
+ext_remove <- 
   function(x){
     substr(x, 1, nchar(x)-4)
   }
@@ -130,26 +129,28 @@ lnplot_custom <- function(x){
 #when downloading the file, the working directory should automatically set to the path where the Markdown file is saved. if that does not occur, copy the Markdown from the dropdown menu between the "" and run the single line of code.
 setwd("C:/Users/busop/All Files - ORIGINAL FILES OF DESKTOP LINKS/Github/market-analysis-2024-2025/Rmarkdown")
 
-dsets <- list.files(path="./Datasets", pattern = "*.csv", full.names = FALSE)   #vector with file names
+dsets <- list.files(path="./Datasets", pattern = "*.csv", full.names = FALSE)   
+#vector with file names
 
 dsets <-
   #assign the value contained in each dataset to its respective name
   setNames(
     lapply(list.files(path= "./Datasets", pattern="*.csv", full.names = TRUE), read.csv), 
     #reading each csv file, same code as dsets w/ exception that it takes full file path rather than just the name
-    lapply(dsets, csv_remove)
+    lapply(dsets, ext_remove)
     #removing ".csv" file extension to create variable list, function above
   )
 
-# xls_dsets <- list.files(path="./Datasets", pattern = "*.xls", full.names = FALSE)   #vector with file names
-# 
-# xls_dsets <- 
-#   setNames(
-#     lapply(list.files(path="./Datasets", pattern = "*.xls", full.names = TRUE), read_xls),
-#     lapply(xls_dsets, xls_remove)
-#   )
+#same concept reapplied for xlsx files, useful to separate the two
+xlsx_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)
 
-#final dsets vector contains variables associated w/ respective dataset:
+xlsx_dsets <-
+  setNames(
+    lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_xlsx),
+    lapply(xlsx_dsets, ext_remove)
+  )
+
+#final dsets vectors contains variables associated w/ respective dataset:
 #-global edits done to reduce variable names, since discarded data not required.
 #-method flexible to increases, decreases or variations in order to dataset directory.
 ```
@@ -719,16 +720,16 @@ parallels_graph_ui <-
           width = "100%"
         ),
         radioButtons(inputId = "radioB_specifics",
-               label = "Countries Compared",
-               choices = radioBn_choice,
-               selected = radioBn_choice[1])
+                     label = "Countries Compared",
+                     choices = radioBn_choice,
+                     selected = radioBn_choice[1])
       ),
-
+      
       mainPanel(
         width = 8,
         highchartOutput(outputId = "parallels_highchart")
       ),
-
+      
       position = c("left", "right")
     )
   })
@@ -753,13 +754,13 @@ parallels_graph_server <- function(input, output){
       c(5000, 50000)
     }
   })
-
+  
   parallels_filtered_data <-
     reactive({
       temp <- parallels_topic_choice()
       temp <- temp[[1]]
       scale <- parallels_scale()
-
+      
       if(input$parallels_selection == pickerIp_choice[1]){
         temp %>%
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
@@ -770,9 +771,9 @@ parallels_graph_server <- function(input, output){
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
           hc_tooltip(.,
-           headerFormat = "",
-           pointFormat =
-             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.2f}%") %>%
+                     headerFormat = "",
+                     pointFormat =
+                       "<b>{point.name}</b><br>Year: {point.x:.f}<br>Growth Rate: {point.y:.2f}%") %>%
           hc_caption(
             text = "<b>Same scale comparison of Portugal's, Italy's and Spain's population growth rate.</b>",
             style = list(marginTop = "0px") 
@@ -781,9 +782,9 @@ parallels_graph_server <- function(input, output){
             line = list(zoneAxis = "x", 
                         zones = list(list(value = 2023, color = "#db240c"),
                                      list(color = "#db240c", dashStyle = "Dash")
-                                     )
-                       )
+                        )
             )
+          )
       } else if(input$parallels_selection == pickerIp_choice[2]){
         temp %>%
           filter(Entity %in% as.character(input$radioB_specifics)) %>%
@@ -794,9 +795,9 @@ parallels_graph_server <- function(input, output){
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
           hc_tooltip(.,
-           headerFormat = "",
-           pointFormat =
-             "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>%
+                     headerFormat = "",
+                     pointFormat =
+                       "<b>{point.name}</b><br>Year: {point.x:.f}<br>Life Expectancy: {point.y:.1f} years") %>%
           hc_caption(
             text = "<b>Same scale comparison of Portugal's, Italy's and Spain's life expectancy.</b>",
             style = list(marginTop = "0px")
@@ -811,21 +812,21 @@ parallels_graph_server <- function(input, output){
           lnplot_custom(.) %>%
           hc_yAxis(min = scale[1], max = scale[2]) %>% 
           hc_tooltip(.,
-           headerFormat = "",
-           pointFormat =
-             "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per Capita: {point.y:.0f} $/inhab") %>%
+                     headerFormat = "",
+                     pointFormat =
+                       "<b>{point.name}</b><br>Year: {point.x:.f}<br>GDP per Capita: {point.y:.0f} $/inhab") %>%
           hc_caption(
             text = "<b>Same scale comparison of Portugal's, Italy's and Spain's GDP per capita.</b>",
             style = list(marginTop = "0px")
           )
       }
     })
-
+  
   output$parallels_highchart <- renderHighchart({
     req(input$radioB_specifics)
     parallels_filtered_data()
   })
-
+  
 }
 
 shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
