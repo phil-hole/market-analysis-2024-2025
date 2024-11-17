@@ -61,6 +61,11 @@ ext_remove <-
     substr(x, 1, nchar(x)-4)
   }
 
+xls_remove <-
+  function(x){
+    substr(x, 1, nchar(x)-5)
+  }
+
 #-----#
 
 #HIGHCHARTER() SCATTERPLOT FORMAT
@@ -147,7 +152,7 @@ xlsx_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FAL
 xlsx_dsets <-
   setNames(
     lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_xlsx),
-    lapply(xlsx_dsets, ext_remove)
+    lapply(xlsx_dsets, xls_remove)
   )
 
 #final dsets vectors contains variables associated w/ respective dataset:
@@ -843,7 +848,7 @@ shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 ###
 
 ```{r ECONOMIC OVERVIEW}
-#CLEAN PARALLELS DATASETS
+#CLEAN ECONOMICS DATASETS
 economic_factor_choice <- 
   c("Nominal GDP", "Consumer Price Index", "Real GDP", "Real GDP Growth Rate", "Unemployment Rate", "Inflation Rate")
 
@@ -859,7 +864,6 @@ economics_cpi <-
   select(-Code, -Entity) %>% 
   rename(`Consumer Price Index` = Consumer.price.index..2010...100.)
   
-
 economics_rgdp <-
   merge(economics_nom_gdp, economics_cpi, by = "Year") %>% 
   mutate(`Real GDP` = (`Nominal GDP`/`Consumer Price Index`)*100) %>% 
@@ -1100,13 +1104,152 @@ Inflation, being the growth rate of the consumer price index, is indicative of t
 
 ### **Supply**
 
+```{r SUPPLY GRAPHS}
+#CLEAN SUPPLY DATASETS
+clean_volume_price <-
+  xlsx_dsets[["portugal_retail_volume_price"]] %>% 
+  select(-`Category`, -`Unit`, -`Current Constant P`) %>% 
+  pivot_longer(
+    cols = c(-Geography,  -`Data Type`), 
+    names_to = "Year", # Create a Year column from column names
+    values_to = "Value" # Place data values in the Value column
+  ) %>% 
+  pivot_wider(names_from = `Data Type`, values_from = Value) %>% 
+  mutate(`Price/Volume` = `Retail Value RSP` / `Retail Volume (Tonnes)`)
+
+# clean_volume_price <-
+#   clean_volume_price %>% 
+#   split(., clean_volume_price$Geography)
+
+clean_company_shares <-
+  xlsx_dsets[["portugal_company_shares"]] %>% 
+  select(-Country, -Category, -Unit)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#FILTER VECTORS
+supply_graph_choice <- c("Volumes w.r.t Sale Revenue", "Company Shares")
+supply_graph_code <- list(clean_volume_price, clean_company_shares)
+
+#UI AND SERVER LOGIC
+supply_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 3,
+        pickerInput(
+          inputId = "supply_selection",
+          label = "Supply Graphs",
+          choices = supply_graph_choice,
+          selected = supply_graph_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        ),
+        uiOutput(outputId = "supply_plus_filter")
+      ),
+      
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "supply_highchart")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+
+
+supply_graph_server <- function(input, output){
+  supply_graph_selected <- reactive({
+    supply_graph_code[supply_graph_choice %in% input$supply_selection]
+  })
+  
+  output$supply_plus_filter <- renderUI({
+    if(input$supply_selection == supply_graph_choice[1]){
+        tagList(
+          pickerInput(
+          inputId = "volumes_country_selection",
+            label = "Geographic Scale",
+            choices = c("Portugal", "World"),
+            selected = "Portugal",
+            options = list(style = "btn-danger"),
+            width = "100%"
+          ),
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_year_slider",
+                      label = "Year Interval",
+                      min = 2010,
+                      max = 2024,
+                      value = c(2010, 2024),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    }
+  })
+    
+    
+  supply_filtered_graph <- reactive({
+    temp <- supply_graph_selected()
+    
+    if(input$supply_selection == supply_graph_choice[1]){
+      req(input$volumes_country_selection, input$supply_year_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Geography == as.character(input$volumes_country_selection)) %>% 
+        filter(Year >= input$supply_year_slider[1], Year <= input$supply_year_slider[2])
+    }
+  })
+    
+  output$supply_highchart <- renderHighchart({
+    if(input$supply_selection == supply_graph_choice[1]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(`Retail Volume (Tonnes)`, `Retail Value RSP`, name= Year)) %>% 
+        hc_title(text = "Snack Production Volumes w.r.t Average Price") %>%
+        lnplot_custom(.) %>%
+        hc_yAxis(title=list(
+                         text="<b>Value Generated in Snack Market [Retail Value RSP]</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + ' mil €';
+                                }
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Snack Retail Volume</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Retail Volume: {point.x:.f} tonnes<br>Retail Value RSP: {point.y:.f} mil €<br>Ratio: {point.Price/Volume:.1f} mil €/tonnes") 
+        # %>% hc_caption(
+        #   text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
+        #   style = list(marginTop = "0px")
+        # )
+    }
+  })
+  
+} 
+
+shinyApp(ui = supply_graph_ui, server = supply_graph_server)
+```
+ 
+## Demand Side
+
+### **Demand**
+
 ####
 
+filler
 sitography:
 https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
+####
+
 ```{r}
-2+2
+3+3
 
 # graph_ui <-
 #   fluidPage({
@@ -1122,12 +1265,12 @@ https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 #           width = "100%"
 #         )
 #       ),
-#       
+# 
 #       mainPanel(
 #         width = 8,
 #         highchartOutput(outputId = "highchart")
 #       ),
-#       
+# 
 #       position = c("left", "right")
 #     )
 #   })
@@ -1145,18 +1288,6 @@ https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 #   }
 #       
 # shinyApp(ui = graph_ui, server = graph_server)
-```
- 
-## Demand Side
-
-### **Demand**
-
-####
-
-filler
-
-```{r}
-3+3
 ```
 
 
@@ -1203,6 +1334,211 @@ filler
 ## Graph Tester
 
 ```{r}
+#CLEAN SUPPLY DATASETS
+clean_volume_price <-
+  xlsx_dsets[["portugal_retail_volume_price"]] %>% 
+  select(-`Category`, -`Unit`, -`Current Constant P`) %>% 
+  pivot_longer(
+    cols = c(-Geography,  -`Data Type`), 
+    names_to = "Year", # Create a Year column from column names
+    values_to = "Value" # Place data values in the Value column
+  ) %>% 
+  pivot_wider(names_from = `Data Type`, values_from = Value) %>% 
+  mutate(`Price/Volume` = `Retail Value RSP` / `Retail Volume (Tonnes)`)
+
+# clean_volume_price <-
+#   clean_volume_price %>% 
+#   split(., clean_volume_price$Geography)
+
+clean_company_shares <-
+  xlsx_dsets[["portugal_company_shares"]] %>% 
+  select(-Country, -Category, -Unit)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#FILTER VECTORS
+supply_graph_choice <- c("Volumes w.r.t Sale Revenue", "Company Shares")
+supply_graph_code <- list(clean_volume_price, clean_company_shares)
+
+#UI AND SERVER LOGIC
+supply_graph_ui <-
+  fluidPage({
+    sidebarLayout(
+      sidebarPanel(
+        width = 4,
+        pickerInput(
+          inputId = "supply_selection",
+          label = "Supply Graphs",
+          choices = supply_graph_choice,
+          selected = supply_graph_choice[1],
+          options = list(style = "btn-danger"),
+          width = "100%"
+        ),
+        uiOutput(outputId = "supply_plus_filter")
+      ),
+      
+      mainPanel(
+        width = 8,
+        highchartOutput(outputId = "supply_highchart")
+      ),
+
+      position = c("left", "right")
+    )
+  })
+
+
+
+supply_graph_server <- function(input, output){
+  supply_graph_selected <- reactive({
+    supply_graph_code[supply_graph_choice %in% input$supply_selection]
+  })
+  
+  output$supply_plus_filter <- renderUI({
+    if(input$supply_selection == supply_graph_choice[1]){
+        tagList(
+          pickerInput(
+          inputId = "volumes_country_selection",
+            label = "Geographic Scale",
+            choices = c("Portugal", "World"),
+            selected = "Portugal",
+            options = list(style = "btn-danger"),
+            width = "100%"
+          ),
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_year_slider",
+                      label = "Year Interval",
+                      min = 2010,
+                      max = 2024,
+                      value = c(2010, 2024),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    }
+  })
+    
+    
+  supply_filtered_graph <- reactive({
+    temp <- supply_graph_selected()
+    
+    if(input$supply_selection == supply_graph_choice[1]){
+      req(input$volumes_country_selection, input$supply_year_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Geography == as.character(input$volumes_country_selection)) %>% 
+        filter(Year >= input$supply_year_slider[1], Year <= input$supply_year_slider[2])
+    }
+  })
+    
+  output$supply_highchart <- renderHighchart({
+    if(input$supply_selection == supply_graph_choice[1]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(`Retail Volume (Tonnes)`, `Retail Value RSP`, name= Year)) %>% 
+        hc_title(text = "Snack Production Volumes w.r.t Average Price") %>%
+        lnplot_custom(.) %>%
+        hc_yAxis(title=list(
+                         text="<b>Value Generated in Snack Market [Retail Value RSP]</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + ' mil €';
+                                }
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Snack Retail Volume</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Retail Volume: {point.x:.f} tonnes<br>Retail Value RSP: {point.y:.f} mil €<br>Ratio: {point.Price/Volume:.1f} mil €/tonnes") %>%
+        hc_caption(
+          text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
+          style = list(marginTop = "0px")
+        )
+    }
+  })
+  
+} 
+
+shinyApp(ui = supply_graph_ui, server = supply_graph_server)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # pickerIp_choice <- c("Population", "Life Expectancy", "GDP per Capita")
 # radioBn_choice <- c("Portugal", "Italy", "Spain")
 # parallel_series_colours <- c("Portugal" = "#db240c", "Italy" = "#046A38", "Spain" = "#FFE900")
