@@ -864,10 +864,10 @@ economics_cpi <-
   select(-Code, -Entity) %>% 
   rename(`Consumer Price Index` = Consumer.price.index..2010...100.)
   
+
 economics_rgdp <-
-  merge(economics_nom_gdp, economics_cpi, by = "Year") %>% 
-  mutate(`Real GDP` = (`Nominal GDP`/`Consumer Price Index`)*100) %>% 
-  select(Year, `Real GDP`)
+  dsets[["portugal_real_gdp"]] %>% 
+  rename(`Real GDP` = CLVMNACSCAB1GQPT, `Year` = DATE)
 
 economics_rgdp_g_rate <-
   economics_rgdp %>% 
@@ -1000,22 +1000,17 @@ economics_graph_server <- function(input, output){
             hc_yAxis(title=list(text="<b>Real GDP [int $]</b>", align="middle"),
                      labels = list(
                                 formatter = JS("function() {
-                                    if (this.value >= 1000000000) {
-                                      return (this.value/1000000000) + ' bil';
-                                    } else if (this.value >= 1000000) {
-                                      return (this.value / 1000000) + ' mil';
-                                    } else if (this.value >= 1000) {
-                                      return (this.value / 1000) + ' k';
+                                    if (this.value >= 0) {
+                                      return (this.value/1000) + ' bil';
                                     }
-                                    return this.value;
                                   }")
                                 )
                     ) %>%
-            hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+            hc_xAxis(title=list(text="<b>Year [Quarters per Year]</b>", align="middle")) %>%
             hc_tooltip(.,
                  headerFormat = "",
                  pointFormat =
-                   "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP: {point.y:,.0f} int $"
+                   "<b>{point.name}</b><br>Real GDP: {point.y:,.0f} bil int $"
             ) %>%
             hc_caption(
               text = "<b>Real GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, adjusted for constant prices using a deflator, the yearly consumer price index.",
@@ -1108,7 +1103,7 @@ Inflation, being the growth rate of the consumer price index, is indicative of t
 #CLEAN SUPPLY DATASETS
 clean_volume_price <-
   xlsx_dsets[["portugal_retail_volume_price"]] %>% 
-  select(-`Category`, -`Unit`, -`Current Constant P`) %>% 
+  select(-`Category`, -`Unit`, -`Current Constant P`)%>% 
   pivot_longer(
     cols = c(-Geography,  -`Data Type`), 
     names_to = "Year", # Create a Year column from column names
@@ -1117,13 +1112,24 @@ clean_volume_price <-
   pivot_wider(names_from = `Data Type`, values_from = Value) %>% 
   mutate(`Price/Volume` = `Retail Value RSP` / `Retail Volume (Tonnes)`)
 
-# clean_volume_price <-
-#   clean_volume_price %>% 
-#   split(., clean_volume_price$Geography)
-
 clean_company_shares <-
   xlsx_dsets[["portugal_company_shares"]] %>% 
-  select(-Country, -Category, -Unit)
+  select(-Country, -Category, -Unit) %>% 
+  filter(complete.cases(.)) %>% 
+  filter(Company != "Kellanova") %>% 
+  head(., 10) %>% 
+  pivot_longer(cols = -Company,
+               names_to = "Year", # Create a Year column from column names
+               values_to = "Value" # Place data values in the Value column
+               ) %>% 
+  mutate(Year = as.integer(Year)) %>% 
+  group_by(Year)
+
+
+
+%>%        # Group data by Year
+  summarize(Mean_Value = mean(Value, na.rm = TRUE)) # Calculate mean value
+
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #FILTER VECTORS
@@ -1204,30 +1210,38 @@ supply_graph_server <- function(input, output){
   output$supply_highchart <- renderHighchart({
     if(input$supply_selection == supply_graph_choice[1]){
       supply_filtered_graph() %>% 
-        hchart("line", hcaes(`Retail Volume (Tonnes)`, `Retail Value RSP`, name= Year)) %>% 
+        hchart("line", hcaes(`Retail Volume (Tonnes)`, `Price/Volume`, name= Year)) %>% 
         hc_title(text = "Snack Production Volumes w.r.t Average Price") %>%
         lnplot_custom(.) %>%
         hc_yAxis(title=list(
-                         text="<b>Value Generated in Snack Market [Retail Value RSP]</b>", 
+                         text="<b>Average Price [€]</b>", 
                          align="middle"
                        ),
                  labels = list(
                             formatter = JS("function() {
                                 if (this.value >= 0) {
-                                  return (this.value) + ' mil €';
+                                  return (this.value) + ' €';
                                 }
                               }")
                             )
                 ) %>%
-        hc_xAxis(title=list(text="<b>Snack Retail Volume</b>", align="middle")) %>%
+        hc_xAxis(title=list(text="<b>Snack Retail Volume [000 tonnes]</b>", align="middle"),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + 'k';
+                                }
+                              }")
+                            )) %>%
+        hc_size(width = NULL, height = 250) %>% 
         hc_tooltip(.,
              headerFormat = "",
              pointFormat =
-               "<b>{point.name}</b><br>Retail Volume: {point.x:.f} tonnes<br>Retail Value RSP: {point.y:.f} mil €<br>Ratio: {point.Price/Volume:.1f} mil €/tonnes") 
-        # %>% hc_caption(
-        #   text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
-        #   style = list(marginTop = "0px")
-        # )
+               "<b>{point.name}</b><br>Retail Volume: {point.x:.f}k tonnes<br>Average Price: {point.y:.1f} €<br>Retail Value RSP: {point.Retail Value RSP:.1f} mil €") 
+        %>% hc_caption(
+          text = "<b>Retail Sale Revenue/Volumes</b> = relationship expressing a form of average price.",
+          style = list(marginTop = "0px")
+        )
     }
   })
   
