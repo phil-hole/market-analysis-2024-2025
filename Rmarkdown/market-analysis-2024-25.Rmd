@@ -48,8 +48,9 @@ pacman::p_load(
   xts,             #--data format required by dygraphs
   shiny,           #--"runtime: shiny" in JMAL header already loads the library, useful for debugging w/o                       knitting
   shinyWidgets,    #--additional customisation for shiny elements
-  readxl
-)
+  readxl,
+  viridis
+  )
 ```
 
 
@@ -64,35 +65,6 @@ ext_remove <-
 xls_remove <-
   function(x){
     substr(x, 1, nchar(x)-5)
-  }
-
-#-----#
-
-#HIGHCHARTER() SCATTERPLOT FORMAT
-scplot_custom <- function(x){ 
-  x %>% 
-    hc_title(style=list(
-               fontWeight="bold",
-               fontSize= "15px",
-               fontFamily= "Lato"
-              )
-             ) %>% 
-    hc_size(., width=80, height=310) %>% 
-    hc_tooltip(., 
-       headerFormat = "",
-       pointFormat = 
-         "<b>{point.name}</b><br>X: {point.x:.1f}%<br>Y: {point.y:.2f}") %>% 
-    hc_yAxis(
-      type="linear",
-      lineWidth=5,
-      labels=list(format="{value}/10"),
-      lineColor="#ecf0f1") %>% 
-    hc_xAxis(
-      type="linear",
-      lineWidth=5,
-      labels=list(format="{value}%"), 
-      lineColor="#ecf0f1") %>% 
-    hc_plotOptions(., scatter=list(color="#db240c"))
   }
 
 #-----#
@@ -122,12 +94,34 @@ lnplot_custom <- function(x){
        pointFormat = 
          "<b>{point.name}</b><br>
           Year: {point.x:.f}<br>Population: {point.y:.f}") %>% 
-    hc_plotOptions(.,line=list(color="#db240c"))
-
-    
-  
+    hc_plotOptions(.,line=list(color="#db240c")) 
 }
 
+#-----#
+
+#HIGHCHARTER() BAR PLOT FORMAT
+barplot_custom <- function(x){
+  x %>% 
+    hc_title(style=list(
+               fontWeight="bold",
+               fontSize= "15px",
+               fontFamily= "Lato"
+              )
+             ) %>% 
+    hc_size(width = NULL, height = 450) %>% 
+    hc_yAxis(
+      type="linear",
+      lineWidth=5,
+      labels=list(format="{value}"),
+      lineColor="#ecf0f1") %>%
+    hc_xAxis(
+      type="linear",
+      lineWidth=5,
+      labels=list(format="{value}"), 
+      lineColor="#ecf0f1") %>%
+    hc_tooltip(shared = TRUE, crosshairs = TRUE, sort = TRUE) 
+}
+  
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 
 #DATA IMPORTING
@@ -147,12 +141,12 @@ dsets <-
   )
 
 #same concept reapplied for xlsx files, useful to separate the two
-xlsx_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE)
+xlsx_dsets <- list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE)
 
 xlsx_dsets <-
   setNames(
-    lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = TRUE), read_xlsx),
-    lapply(xlsx_dsets, xls_remove)
+    lapply(xlsx_dsets, read_xlsx),
+    lapply(list.files(path="./Datasets", pattern = "*.xlsx", full.names = FALSE), xls_remove)
   )
 
 #final dsets vectors contains variables associated w/ respective dataset:
@@ -715,7 +709,7 @@ parallels_graph_ui <-
   fluidPage({
     sidebarLayout(
       sidebarPanel(
-        width = 4,
+        width = NULL,
         pickerInput(
           inputId = "parallels_selection",
           label = "Comparison Factor",
@@ -731,7 +725,7 @@ parallels_graph_ui <-
       ),
       
       mainPanel(
-        width = 8,
+        width = NULL,
         highchartOutput(outputId = "parallels_highchart")
       ),
       
@@ -1093,13 +1087,13 @@ Inflation, being the growth rate of the consumer price index, is indicative of t
 
 
 
-# Snack Market
+# Snack Supply
 
-## Supply Side
+## Snack Supply - Graphs {data-width="575"}
 
-### **Supply**
+### 
 
-```{r SUPPLY GRAPHS}
+```{r SUPPLY GRAPHS, fig.height=10}
 #CLEAN SUPPLY DATASETS
 clean_volume_price <-
   xlsx_dsets[["portugal_retail_volume_price"]] %>% 
@@ -1113,35 +1107,49 @@ clean_volume_price <-
   mutate(`Price/Volume` = `Retail Value RSP` / `Retail Volume (Tonnes)`)
 
 clean_company_shares <-
-  xlsx_dsets[["portugal_company_shares"]] %>% 
-  select(-Country, -Category, -Unit) %>% 
+  xlsx_dsets[["portugal_company_shares"]] %>%
+  select(-Country, -Category, -Unit) %>%
+  filter(complete.cases(.))
+
+clean_enterprise_n <-
+  xlsx_dsets[["portugal_dsets_estat"]] %>% 
+  select(Year, `Enterprise Number`) %>% 
   filter(complete.cases(.)) %>% 
-  filter(Company != "Kellanova") %>% 
-  head(., 10) %>% 
-  pivot_longer(cols = -Company,
-               names_to = "Year", # Create a Year column from column names
-               values_to = "Value" # Place data values in the Value column
-               ) %>% 
-  mutate(Year = as.integer(Year)) %>% 
-  group_by(Year)
+  mutate(Year = as.numeric(Year), `Enterprise Number` = as.numeric(`Enterprise Number`))
 
+clean_employee_n <-
+  xlsx_dsets[["portugal_dsets_estat"]] %>% 
+  select(Year, `Persons Employed`) %>% 
+  filter(complete.cases(.))
+  
+clean_val_added <-
+  xlsx_dsets[["portugal_dsets_estat"]] %>% 
+  select(Year, `Value Added Millions`) %>% 
+  filter(complete.cases(.))
 
+clean_op_surplus <-
+  xlsx_dsets[["portugal_dsets_estat"]] %>% 
+  select(Year, `Gross Operating Surplus Million Euro`) %>% 
+  filter(complete.cases(.))
 
-%>%        # Group data by Year
-  summarize(Mean_Value = mean(Value, na.rm = TRUE)) # Calculate mean value
-
+clean_wages <-
+  xlsx_dsets[["portugal_dsets_estat"]] %>% 
+  select(Year, `Wages and Salaries`) %>% 
+  filter(complete.cases(.))
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #FILTER VECTORS
-supply_graph_choice <- c("Volumes w.r.t Sale Revenue", "Company Shares")
-supply_graph_code <- list(clean_volume_price, clean_company_shares)
+supply_graph_choice <- c("Volumes w.r.t Sale Revenue", "Company Shares", "N° Enterprises", "N° Employees",
+                         "Value Added in Production", "Gross Operating Surplus", "Average Wages and Salaries")
+supply_graph_code <- list(clean_volume_price, clean_company_shares, clean_enterprise_n, clean_employee_n,
+                          clean_val_added, clean_op_surplus, clean_wages)
 
 #UI AND SERVER LOGIC
 supply_graph_ui <-
   fluidPage({
     sidebarLayout(
       sidebarPanel(
-        width = 3,
+        width = NULL,
         pickerInput(
           inputId = "supply_selection",
           label = "Supply Graphs",
@@ -1154,7 +1162,7 @@ supply_graph_ui <-
       ),
       
       mainPanel(
-        width = 8,
+        width = NULL,
         highchartOutput(outputId = "supply_highchart")
       ),
 
@@ -1181,7 +1189,7 @@ supply_graph_server <- function(input, output){
             width = "100%"
           ),
           chooseSliderSkin("Flat", color = '#db240c'),
-          sliderInput(inputId = "supply_year_slider",
+          sliderInput(inputId = "supply_volume_price_slider",
                       label = "Year Interval",
                       min = 2010,
                       max = 2024,
@@ -1191,7 +1199,93 @@ supply_graph_server <- function(input, output){
                       dragRange = TRUE
                       )
         )
-    }
+    } else if(input$supply_selection == supply_graph_choice[2]){
+        tagList(
+            pickerInput(
+            inputId = "company_share_selection",
+              label = "Company Share Data",
+              choices = c("Average Share Value over Time", "Market Concentration"),
+              selected = "Average Share Value over Time",
+              options = list(style = "btn-danger"),
+              width = "100%"
+            ),
+            chooseSliderSkin("Flat", color = '#db240c'),
+            sliderInput(inputId = "supply_company_index_slider",
+                      label = "Company Interval - Decreasing Share Value",
+                      min = 1,
+                      max = 37,
+                      value = c(1, 10),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } else if(input$supply_selection == supply_graph_choice[3]){
+        tagList(
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_enterprise_slider",
+                      label = "Year Interval",
+                      min = 2008,
+                      max = 2022,
+                      value = c(2008, 2022),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } else if(input$supply_selection == supply_graph_choice[4]){
+        tagList(
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_employee_slider",
+                      label = "Year Interval",
+                      min = 2008,
+                      max = 2022,
+                      value = c(2008, 2022),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } else if(input$supply_selection == supply_graph_choice[5]){
+        tagList(
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_val_added_slider",
+                      label = "Year Interval",
+                      min = 2008,
+                      max = 2022,
+                      value = c(2008, 2022),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } else if(input$supply_selection == supply_graph_choice[6]){
+        tagList(
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_op_surplus_slider",
+                      label = "Year Interval",
+                      min = 2008,
+                      max = 2022,
+                      value = c(2008, 2022),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } else if(input$supply_selection == supply_graph_choice[7]){
+        tagList(
+          chooseSliderSkin("Flat", color = '#db240c'),
+          sliderInput(inputId = "supply_wages_slider",
+                      label = "Year Interval",
+                      min = 2008,
+                      max = 2022,
+                      value = c(2008, 2022),
+                      step = 1,
+                      sep = "",
+                      dragRange = TRUE
+                      )
+        )
+    } 
   })
     
     
@@ -1199,11 +1293,71 @@ supply_graph_server <- function(input, output){
     temp <- supply_graph_selected()
     
     if(input$supply_selection == supply_graph_choice[1]){
-      req(input$volumes_country_selection, input$supply_year_slider)
+      req(input$volumes_country_selection, input$supply_volume_price_slider)
       temp <-
         temp[[1]] %>% 
         filter(Geography == as.character(input$volumes_country_selection)) %>% 
-        filter(Year >= input$supply_year_slider[1], Year <= input$supply_year_slider[2])
+        filter(Year >= input$supply_volume_price_slider[1], Year <= input$supply_volume_price_slider[2])
+    } 
+    else if(input$supply_selection == supply_graph_choice[2]){
+      req(input$company_share_selection)
+      if(input$company_share_selection == "Average Share Value over Time"){
+        req(input$supply_company_index_slider)  
+        temp <-
+            temp[[1]] %>% 
+            slice(input$supply_company_index_slider[1]:input$supply_company_index_slider[2]) %>% 
+            pivot_longer(cols = -Company,
+                         names_to = "Year",
+                         values_to = "Value"
+                         ) %>% 
+            filter(Value != "-") %>% 
+            mutate(Year = as.numeric(Year), Value = as.numeric(Value)) %>%
+            group_by(Year) %>%
+            summarize(Mean_Value = mean(Value, na.rm = TRUE))
+      } 
+      else if(input$company_share_selection == "Market Concentration"){
+        req(input$supply_company_index_slider)  
+        temp <-
+          temp[[1]] %>% 
+          slice(input$supply_company_index_slider[1]:input$supply_company_index_slider[2]) %>% 
+          pivot_longer(cols = -Company,
+                       names_to = "Year",
+                       values_to = "Value"
+                       ) %>%
+          filter(Value != "-", Company != "Total") %>%
+          mutate(Year = as.numeric(Year), Value = as.numeric(Value)) %>%
+          pivot_wider(names_from = Company, values_from = Value)
+      } 
+    }
+    else if(input$supply_selection == supply_graph_choice[3]){
+      req(input$supply_enterprise_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$supply_enterprise_slider[1], Year <= input$supply_enterprise_slider[2])
+    }
+    else if(input$supply_selection == supply_graph_choice[4]){
+      req(input$supply_employee_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$supply_employee_slider[1], Year <= input$supply_employee_slider[2])
+    }
+    else if(input$supply_selection == supply_graph_choice[5]){
+      req(input$supply_val_added_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$supply_val_added_slider[1], Year <= input$supply_val_added_slider[2])
+    }
+    else if(input$supply_selection == supply_graph_choice[6]){
+      req(input$supply_op_surplus_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$supply_op_surplus_slider[1], Year <= input$supply_op_surplus_slider[2])
+    } 
+    else if(input$supply_selection == supply_graph_choice[7]){
+      req(input$supply_wages_slider)
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$supply_wages_slider[1], Year <= input$supply_wages_slider[2])
     }
   })
     
@@ -1233,24 +1387,283 @@ supply_graph_server <- function(input, output){
                                 }
                               }")
                             )) %>%
-        hc_size(width = NULL, height = 250) %>% 
         hc_tooltip(.,
              headerFormat = "",
              pointFormat =
-               "<b>{point.name}</b><br>Retail Volume: {point.x:.f}k tonnes<br>Average Price: {point.y:.1f} €<br>Retail Value RSP: {point.Retail Value RSP:.1f} mil €") 
-        %>% hc_caption(
+               "<b>{point.name}</b><br>Retail Volume: {point.x:.f}k tonnes<br>Average Price: {point.y:.1f} €<br>Retail Value RSP: {point.Retail Value RSP:.1f} mil €"
+             ) %>% 
+        hc_caption(
           text = "<b>Retail Sale Revenue/Volumes</b> = relationship expressing a form of average price.",
+          style = list(marginTop = "0px")
+        )
+    } 
+    else if(input$supply_selection == supply_graph_choice[2]){
+        if(input$company_share_selection == "Average Share Value over Time"){
+          supply_filtered_graph() %>% 
+            hchart("line", hcaes(Year, Mean_Value)) %>%
+            hc_title(text = "Average Share Value over Time") %>%
+            lnplot_custom(.) %>% 
+            hc_yAxis(title=list(
+                             text="<b>Average Share Value [€]</b>", 
+                             align="middle"
+                           ),
+                     labels = list(
+                                formatter = JS("function() {
+                                    if (this.value >= 1000) {
+                                      return (this.value/1000) + 'k';
+                                    } 
+                                  }")
+                                )
+                    ) %>%
+            hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+            hc_tooltip(.,
+                 headerFormat = "",
+                 pointFormat =
+                   "<b>{point.name}</b><br>Year: {point.x:.f}<br>Average Share Value: {point.y:.1f}€"
+                 ) %>% 
+            hc_caption(
+              text = "<b>N-Indexed Average Share Value</b> = average value of the first n companies' share, relative to the snack market for any year. Indicative of competitiveness for small intervals.",
+              style = list(marginTop = "0px")
+            )
+        } else if (input$company_share_selection == "Market Concentration"){
+            temp <- supply_filtered_graph() 
+            hc_data <- 
+              lapply(
+                names(temp)[-1], 
+                function(company) {
+                  list(name = company, data = as.numeric(temp[[company]]))
+                }
+              )
+            highchart() %>%
+              hc_chart(type = "column") %>%
+              hc_title(text = "Market Concentration") %>%
+              hc_plotOptions(column = list(stacking = "normal")) %>%
+              hc_add_series_list(hc_data) %>%
+              barplot_custom(.) %>% 
+              hc_xAxis(categories = temp$Year) %>%
+              hc_yAxis(title = list(text = "<b>Aggregate Share Value</b>", align = "middle", min = 0, max = 50,
+                                    labels = list(
+                                              formatter = JS("function() {
+                                                  if (this.value >= 0) {
+                                                    return (this.value) + '€';
+                                                  } 
+                                                }")
+                                ))) %>%
+              hc_colors(colorRampPalette(c("#db240c", "#046A38", "#FFE900"))(input$supply_company_index_slider[2])) %>% 
+              hc_caption(
+                text = "<b>N-Indexed Market Concentration</b> = sum of share value of the first n companies in share value, indicator of concentration of market activities.",
+                style = list(marginTop = "0px"))
+        }
+    }
+    else if(input$supply_selection == supply_graph_choice[3]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Enterprise Number`)) %>% 
+        hc_title(text = "Number of Enterprises") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>N° Enterprises</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 1000) {
+                                  return (this.value/1000) + 'k';
+                                } 
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Enterprises: {point.y:.f}"
+             ) %>% 
+        hc_caption(
+          text = "<b>N° Enterprises</b> = number of enterprises active in the food manufacture market at a given time.",
+          style = list(marginTop = "0px")
+        )
+    }
+    else if(input$supply_selection == supply_graph_choice[4]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Persons Employed`)) %>% 
+        hc_title(text = "Number of Employees") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>N° Employees</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 1000) {
+                                  return (this.value/1000) + 'k';
+                                } 
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Employees: {point.y:.f}"
+             ) %>% 
+        hc_caption(
+          text = "<b>N° Employees</b> = number of employees working for enterprises active in the food manufacture market at a given time.",
+          style = list(marginTop = "0px")
+        )
+    }
+    else if(input$supply_selection == supply_graph_choice[5]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Value Added Millions`)) %>% 
+        hc_title(text = "Value Added through Production [mil]") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>Value Added</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + ' mil';
+                                } else if (this.value >= 1000) {
+                                  return (this.value/1000) + ' bil'
+                                }
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>Value Added: {point.y:.f} mil €"
+             ) %>% 
+        hc_caption(
+          text = "<b>Value Added through Production</b> = increase in value brought by a production process, quantifiable as the difference between its sale price and the cost of its relative production factors.",
+          style = list(marginTop = "0px")
+        )
+    }
+    else if(input$supply_selection == supply_graph_choice[6]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Gross Operating Surplus Million Euro`)) %>% 
+        hc_title(text = "Gross Operating Surplus") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>Gross Operating Surplus [mil €]</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + ' mil';
+                                } else if (this.value >= 1000) {
+                                  return (this.value/1000) + ' bil'
+                                }
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>Gross Operating Surplus: {point.y:.f} mil €"
+             ) %>% 
+        hc_caption(
+          text = "<b>Gross Operating Surplus</b> = enterprise profit on goods and services produced following the payment of labour costs.",
+          style = list(marginTop = "0px")
+        )
+    }
+    else if(input$supply_selection == supply_graph_choice[7]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Wages and Salaries`)) %>% 
+        hc_title(text = "Aggregate Labour Cost [mil €]") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>Aggregate Labour Cost [mil €]</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + ' mil';
+                                } else if (this.value >= 1000) {
+                                  return (this.value/1000) + ' bil'
+                                }
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>Aggregate Labour Cost: {point.y:.f} mil €"
+             ) %>% 
+        hc_caption(
+          text = "<b>Aggregate Labour Cost</b> = cost of labour, aggregate corporate expenditure in wages and salaries.",
+          style = list(marginTop = "0px")
+        )
+    }
+    else if(input$supply_selection == supply_graph_choice[8]){
+      supply_filtered_graph() %>% 
+        hchart("line", hcaes(Year, `Investment Rate`)) %>% 
+        hc_title(text = "Investment Rate [%]") %>%
+        lnplot_custom(.) %>% 
+        hc_yAxis(title=list(
+                         text="<b>Investment Rate [%]</b>", 
+                         align="middle"
+                       ),
+                 labels = list(
+                            formatter = JS("function() {
+                                if (this.value >= 0) {
+                                  return (this.value) + '%';
+                              }")
+                            )
+                ) %>%
+        hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
+        hc_tooltip(.,
+             headerFormat = "",
+             pointFormat =
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>Investment Rate: {point.y:.f}%€"
+             ) %>% 
+        hc_caption(
+          text = "<b>Investment Rate</b> = ratio between gross tangible investment to net value added, a measure of conversion of investments into tangible profit.",
           style = list(marginTop = "0px")
         )
     }
   })
-  
 } 
 
 shinyApp(ui = supply_graph_ui, server = supply_graph_server)
 ```
+
+## Supply Side - Text {.tabset .tabset-fade}
+
+### Supply 1/2
+
+#### Retail Value vs Volume
+
+filler
+
+#### Employment Rate and Wages 
+
+filler
+
+#### Investment Rate and Business Growth
+
+filler
+
+### Supply 2/2
+
+#### Competitor Landscape
+
+filler
+
+#### Other Stuff
+
+filler
  
-## Demand Side
+ 
+# Snack Demand
+
+## Demand
 
 ### **Demand**
 
@@ -1348,136 +1761,54 @@ https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 ## Graph Tester
 
 ```{r}
-#CLEAN SUPPLY DATASETS
-clean_volume_price <-
-  xlsx_dsets[["portugal_retail_volume_price"]] %>% 
-  select(-`Category`, -`Unit`, -`Current Constant P`) %>% 
-  pivot_longer(
-    cols = c(-Geography,  -`Data Type`), 
-    names_to = "Year", # Create a Year column from column names
-    values_to = "Value" # Place data values in the Value column
-  ) %>% 
-  pivot_wider(names_from = `Data Type`, values_from = Value) %>% 
-  mutate(`Price/Volume` = `Retail Value RSP` / `Retail Volume (Tonnes)`)
-
-# clean_volume_price <-
-#   clean_volume_price %>% 
-#   split(., clean_volume_price$Geography)
 
 clean_company_shares <-
-  xlsx_dsets[["portugal_company_shares"]] %>% 
-  select(-Country, -Category, -Unit)
-
-#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
-#FILTER VECTORS
-supply_graph_choice <- c("Volumes w.r.t Sale Revenue", "Company Shares")
-supply_graph_code <- list(clean_volume_price, clean_company_shares)
-
-#UI AND SERVER LOGIC
-supply_graph_ui <-
-  fluidPage({
-    sidebarLayout(
-      sidebarPanel(
-        width = 4,
-        pickerInput(
-          inputId = "supply_selection",
-          label = "Supply Graphs",
-          choices = supply_graph_choice,
-          selected = supply_graph_choice[1],
-          options = list(style = "btn-danger"),
-          width = "100%"
-        ),
-        uiOutput(outputId = "supply_plus_filter")
-      ),
-      
-      mainPanel(
-        width = 8,
-        highchartOutput(outputId = "supply_highchart")
-      ),
-
-      position = c("left", "right")
-    )
-  })
+  xlsx_dsets[["portugal_company_shares"]] %>%
+  select(-Country, -Category, -Unit) %>%
+  filter(complete.cases(.)) %>%
+  pivot_longer(cols = -Company,
+                         names_to = "Year",
+                         values_to = "Value"
+                         ) %>%
+  filter(Value != "-", Company != "Total") %>%
+  mutate(Year = as.numeric(Year), Value = as.numeric(Value)) %>%
+  pivot_wider(names_from = Company, values_from = Value)
 
 
+hc_data <- lapply(names(clean_company_shares)[-1], function(company) {
+  list(name = company, data = as.numeric(clean_company_shares[[company]]))
+})
 
-supply_graph_server <- function(input, output){
-  supply_graph_selected <- reactive({
-    supply_graph_code[supply_graph_choice %in% input$supply_selection]
-  })
+# # Highchart
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_title(text = "Stacked Bar Plot of Values by Year") %>%
+  hc_xAxis(categories = clean_company_shares$Year) %>%
+  hc_yAxis(title = list(text = "Total Value")) %>%
+  hc_plotOptions(column = list(stacking = "normal")) %>%
+  hc_add_series_list(hc_data) %>%
+  hc_tooltip(shared = TRUE, crosshairs = TRUE)
   
-  output$supply_plus_filter <- renderUI({
-    if(input$supply_selection == supply_graph_choice[1]){
-        tagList(
-          pickerInput(
-          inputId = "volumes_country_selection",
-            label = "Geographic Scale",
-            choices = c("Portugal", "World"),
-            selected = "Portugal",
-            options = list(style = "btn-danger"),
-            width = "100%"
-          ),
-          chooseSliderSkin("Flat", color = '#db240c'),
-          sliderInput(inputId = "supply_year_slider",
-                      label = "Year Interval",
-                      min = 2010,
-                      max = 2024,
-                      value = c(2010, 2024),
-                      step = 1,
-                      sep = "",
-                      dragRange = TRUE
-                      )
-        )
-    }
-  })
-    
-    
-  supply_filtered_graph <- reactive({
-    temp <- supply_graph_selected()
-    
-    if(input$supply_selection == supply_graph_choice[1]){
-      req(input$volumes_country_selection, input$supply_year_slider)
-      temp <-
-        temp[[1]] %>% 
-        filter(Geography == as.character(input$volumes_country_selection)) %>% 
-        filter(Year >= input$supply_year_slider[1], Year <= input$supply_year_slider[2])
-    }
-  })
-    
-  output$supply_highchart <- renderHighchart({
-    if(input$supply_selection == supply_graph_choice[1]){
-      supply_filtered_graph() %>% 
-        hchart("line", hcaes(`Retail Volume (Tonnes)`, `Retail Value RSP`, name= Year)) %>% 
-        hc_title(text = "Snack Production Volumes w.r.t Average Price") %>%
-        lnplot_custom(.) %>%
-        hc_yAxis(title=list(
-                         text="<b>Value Generated in Snack Market [Retail Value RSP]</b>", 
-                         align="middle"
-                       ),
-                 labels = list(
-                            formatter = JS("function() {
-                                if (this.value >= 0) {
-                                  return (this.value) + ' mil €';
-                                }
-                              }")
-                            )
-                ) %>%
-        hc_xAxis(title=list(text="<b>Snack Retail Volume</b>", align="middle")) %>%
-        hc_tooltip(.,
-             headerFormat = "",
-             pointFormat =
-               "<b>{point.name}</b><br>Retail Volume: {point.x:.f} tonnes<br>Retail Value RSP: {point.y:.f} mil €<br>Ratio: {point.Price/Volume:.1f} mil €/tonnes") %>%
-        hc_caption(
-          text = "<b>Nominal GDP</b> = value expressing the amount of goods and services that are produced and sold through markets, at a given time, calculated using current prices.",
-          style = list(marginTop = "0px")
-        )
-    }
-  })
-  
-} 
 
-shinyApp(ui = supply_graph_ui, server = supply_graph_server)
 
+
+
+
+
+
+
+
+# %>%
+#   pivot_longer(cols = -Company,
+#                names_to = "Year",
+#                values_to = "Value"
+#                ) %>%
+#   filter(Value != "-", Company != "Total") %>%
+#   mutate(Year = as.numeric(Year), Value = as.numeric(Value)) %>%
+#   group_by(Year, Company) %>%
+#   summarize(Aggregate_Value = sum(Value, na.rm = TRUE), .groups = "drop") %>%
+#   pivot_wider(names_from = Company, values_from = Aggregate_Value, values_fill = 0) %>%
+#   pivot_longer(cols = -Year, names_to = "Company", values_to = "Value")
 
 
 
