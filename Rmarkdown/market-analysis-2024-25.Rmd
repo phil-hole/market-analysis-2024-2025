@@ -863,7 +863,7 @@ shinyApp(ui = parallels_graph_ui, server = parallels_graph_server)
 
 <!-- SECTION 1 -->
 
-## General Economic Overview - Graphs {data-width="425"}
+## General Economic Overview - Graphs {data-width="450"}
 
 ###
 
@@ -1064,7 +1064,7 @@ shinyApp(ui = economics_graph_ui, server = economics_graph_server)
 
 # Snack Supply
 
-## Snack Supply - Graphs {data-width="575"}
+## Snack Supply - Graphs {data-width="450"}
 
 ### 
 
@@ -1642,16 +1642,41 @@ shinyApp(ui = supply_graph_ui, server = supply_graph_server)
 
 ## Supply Side - Text
 
-### **Supply**
+### **Until 2012** 
 
-####
+Trend Observed:
 
-The analysis of the supply side of a market hinges on various, diverse factors that influence in their own proportion the extent of occurring transactions. In order to present the most general picture possible, the indicators considered address factors starkly distinct in nature, that all find foundation in the notion of average price, the quotient of market revenues and production volumes. The goal of this section is to offer hypotheses regarding variations to average price, drafted from a comprehensive overview of said factors’ marginal change within the same year. An important premise to state is that represented data regards more generally the food manufacturing sector as a whole rather than the snack market subset. 
-A characteristic standing out in the Portuguese market is an expansive supply throughout the period of study, only deviating from this trend between 2016 and 2018. As observed in the relative graph, the average price of the good of study never goes beyond a minimum of €5,80 and a maximum of €6,80, with all yearly values settling between these two. <br>
-The initial contraction of demand seen until 2012 coincides with a fall in active enterprises and in-sector employment, and could hypothetically be tied to the banking crisis occurring within the same time frame, link strengthened by the drop in labour cost, investment success rate and gross operating surplus. Important to note is the reduction in labour cost parallel to that in employment and gross operating surplus, indicating an increase in price in other production factors, namely raw materials. Despite increasing production costs, the sharp decrease in competition allowed for an adjustment process ending on a lower price yet higher supply.
-A period of supply and demand expansion, proven by stable prices and increasing quantities, was followed up in 2016 by a sudden contraction of supply. The observed increase in average price allows to hypothesize a stable demand through this time. On the other hand, its counterpart experiences a variation difficult to justify, with measured volumes essentially returning to the prior year’s value. In terms of the aforementioned factors, the cost of labour had been growing since 2013, but not to such an extent that would confidently tie the two events together, especially considering its unvaried trend in later years, together with that of employment. The successive logical assumption would be analysing the cost of raw materials but, as proven by an increasing gross operating surplus, again creating a link between the two seems far-fetched. Moreso, an almost unvaried number of active enterprises and market concentration in the top ten companies, leaves no evident conclusion to be made. Nonetheless, comparing such data to the global scale shows that such a contraction is isolated to Portugal, and as such is most likely do to variations in national economic policy, possibly following new food manufacturing regulations. A factor pushing for this conclusion would be an observed local minimum in the investment success rate, demonstrating a diminishing confidence in local food manufacturing. <br>
-Despite the sudden shift in trend mentioned earlier, Portuguese supply returns to its expanding trend up, maintaining it throughout the COVID19 pandemic until 2022, when a sudden price drop occurs. A purely hypothetical claim would be addressing it as a reaction to the end of national lockdowns and a shift in preference towards foods outside of retail sale. A more data-backed interpretation would consider the rise in active enterprise and in gross operating surplus and justify it as a general increase in the competitiveness of the food manufacturing sector, as proven by a decrease in average share value (in terms of % of market value). Other ties could be made linking the decrement in the cost of production factors to it, but due to a lack of data following 2022, they cannot be made with full confidence. <br>
-Other defining characteristics that stood out in the analysis process and were deemed relevant regard the unvarying trend of market concentration, settling towards 30% for the first ten companies and around 23% for the first four. Other than communicating a stable leadership of the food manufacture sector, it is indicative of a tendentially oligarchic market, at least from a competition standpoint. 
+- Demand Contraction (Pre-2012):
+  - Decline in demand coincided with a fall in active enterprises and in-sector employment.
+  - Likely linked to the banking crisis during the same period.
+
+Market Adjustments:
+
+- Decline in labour cost, investment success rate and gross operating surplus.
+- Implies a decrease of confidence in investment and an increase in other production factor cost, namely raw material cost.
+- Decrease in competition resulted in lower prices but growing supply, redistribution of market share.
+
+### **From 2016 to 2018**
+
+- Expansion of supply and demand followed by a sudden supply contraction  (2016), with stable demand inferred from rising prices.
+- Measured supply volumes returned to prior year’s levels, challenging clear causal links to observed trends.
+  - Labour costs grew steadily since 2013, but their trend does not correlate directly with the supply            contraction.
+  - Rising trend in gross operating surplus suggests no significant impact from raw material costs.
+  - Number of active enterprises and market concentration among top companies remained stable, offering no        clear explanation.
+- Contraction isolated to Portugal, likely tied to national economic policies or food manufacturing regulations.
+- A local minimum in investment success indicates reduced confidence in Portugal’s food manufacturing sector.
+
+### **2022 - COVID19 Effect**
+
+- Portuguese supply returned to an upward trend, sustained through the COVID-19 pandemic until 2022.
+- 2022 Price Drop:
+  - Hypothetically linked to post-lockdown preferences for non-retail foods.
+  - More plausibly tied to rising active enterprises and gross operating surplus, reflecting increased            competitiveness in food manufacturing.
+- Decline in average share value (% of market value) suggests greater sector competitiveness.
+- Potential ties to reduced production factor costs exist but lack post-2022 data for confirmation.
+- Market Concentration Stability:
+  - Top 10 companies maintain ~30% market share; top 4 hold ~23%.
+  - Quasi-oligarchic market structure indicates stable leadership in the Portuguese food manufacturing sector.
 
 # Snack Demand
 
