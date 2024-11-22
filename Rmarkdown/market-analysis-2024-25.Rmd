@@ -174,17 +174,17 @@ Fruit Snacks, Snack Bars, Sweet Biscuits in Portugal and the strategy of *Vieira
 
 - What is a snack?
   - "A small meal or amount of food, usually eaten in a hurry." (Oxford Dictionary)
-- What types of snack do we consider?
+- Types of snack considered:
   - Fruit Snacks (dried fruit, processed fruit snacks).
   - Snack Bars (cereal bars, protein/energy bars, fruit and nut bars, other snack
   bars).
   - Sweet Biscuits (chocolate coated biscuits, cookies, filled biscuits, plain
   biscuits, wafers).
-- How do we outline the snack market?
+- Outline of the snack market:
   - The market considered encloses the three categories above, including all their subcategories.
   - The market is valued according to retail selling price (RSP) and includes any
   applicable taxes (definition from Euromonitor).
-  - Factors considered pertain to the subset specified, at most representing the general food manufacture       sector. 
+  - Statistical indicators considered pertain to the subset specified, at most representing the general food    manufacture sector. 
 
 <!-- INDEX SECTION -->
 
@@ -792,11 +792,11 @@ parallels_graph_server <- function(input, output){
   
   parallels_scale <- reactive({
     if(input$parallels_selection == pickerIp_choice[1]){
-      c(-3, 3)
+      c(-2, 2)
     }else if(input$parallels_selection == pickerIp_choice[2]){
-      c(40, 100)
+      c(57, 85)
     }else{
-      c(5000, 50000)
+      c(15000, 50000)
     }
   })
   
@@ -1146,7 +1146,8 @@ clean_volume_price <-
 clean_company_shares <-
   xlsx_dsets[["portugal_company_shares"]] %>%
   select(-Country, -Category, -Unit) %>%
-  filter(complete.cases(.))
+  filter(complete.cases(.)) %>% 
+  filter(Company != "Total")
 
 clean_enterprise_n <-
   xlsx_dsets[["portugal_dsets_estat"]] %>% 
@@ -1418,7 +1419,7 @@ supply_graph_server <- function(input, output){
                        names_to = "Year",
                        values_to = "Value"
                        ) %>%
-          filter(Value != "-", Company != "Total") %>%
+          filter(Value != "-") %>%
           mutate(Year = as.numeric(Year), Value = as.numeric(Value)) %>%
           pivot_wider(names_from = Company, values_from = Value)
       } 
@@ -1644,8 +1645,8 @@ supply_graph_server <- function(input, output){
                            ),
                      labels = list(
                                 formatter = JS("function() {
-                                    if (this.value >= 1000) {
-                                      return (this.value/1000) + 'k';
+                                    if (this.value) {
+                                      return (this.value) + '%';
                                     } 
                                   }")
                                 )
@@ -1680,7 +1681,7 @@ supply_graph_server <- function(input, output){
                        min = 0,
                        labels = list(
                                  formatter = JS("function() {
-                                     if (this.value >= 0) {
+                                     if (this.value) {
                                        return (this.value) + '%';
                                      } 
                                    }")
@@ -1700,7 +1701,7 @@ shinyApp(ui = supply_graph_ui, server = supply_graph_server)
 
 <!-- TEXT -->
 
-## Supply Side - Text
+## Snack Supply - Text
 
 ### **Until 2012** 
 
@@ -1742,21 +1743,22 @@ Market Adjustments:
 
 <!-- GRAPHS -->
 
-## Demand
+## Snack Demand - Graphs
 
 <!-- TEXT -->
 
-### **Demand**
+### 
 
-####
+```{r DEMAND }
+2+2
+```
 
-filler
-sitography:
-https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
-####
 
-```{r DEMAND GRAPHS}
+
+### 
+
+```{r DEMAND VOLUME PRICE PARALLEL}
 #CLEAN DEMAND DATASETS
 
 clean_volume_parallel <-
@@ -1819,7 +1821,7 @@ clean_volume_parallel %>%
              crosshairs = TRUE, 
              valueDecimals = 1
              ) %>% 
-  hc_colors(., c("#db240c", "#046A38", "#FFE900", "#002D72", "#000000")) 
+  hc_colors(., c("#002D72", "#046A38", "#FFE900", "#db240c", "#000000")) 
   
 
 
@@ -1864,11 +1866,13 @@ clean_volume_parallel %>%
 # shinyApp(ui = graph_ui, server = graph_server)
 ```
 
-## Demand 2
+## Snack Demand - Text
 
 ### 
 
 filler
+sitography:
+https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 
 
 
