@@ -337,7 +337,7 @@ clean_immigration <-
   dsets[["portugal_migrant_stock"]]%>% 
   filter(Year >= 1800 & Entity == "Portugal" & Year <= 2023) %>% 
   select(-Code, -Entity) %>% 
-  rename(`International Immigrants` = Total.number.of.international.immigrants)%>% 
+  rename(`International Immigrants` = Total.number.of.international.immigrants) %>% 
   hchart("line", hcaes(`Year`, `International Immigrants`)) %>% 
   hc_title(text = "Portuguese International Immigrants") %>% 
   lnplot_custom(.) %>% 
@@ -1766,10 +1766,23 @@ Market Adjustments:
 
 ```{r DEMAND GRAPHS, fig.height=8}
 #CLEAN DATASETS
+clean_total_market_value <-
+  xlsx_dsets[["portugal_retail_volume_price"]] %>% 
+  filter(Geography == "Portugal", `Data Type` == "Retail Value RSP") %>% 
+  select(-Geography, -`Unit`, -`Current Constant P`, -`Data Type`) %>% 
+  pivot_longer(
+    cols = -Category,
+    names_to = "Year",
+    values_to = "Value"
+  ) %>% 
+  group_by(Year) %>% 
+  summarize(tot_market_value = sum(Value))
+  
+
 clean_volume_parallel <-
   xlsx_dsets[["portugal_retail_volume_price"]] %>% 
   filter(Geography == "Portugal") %>% 
-  select(-Geography, -`Unit`, -`Current Constant P`)%>% 
+  select(-Geography, -`Unit`, -`Current Constant P`) %>% 
   pivot_longer(
     cols = c(-Category, -`Data Type`),
     names_to = "Year",
@@ -1857,9 +1870,10 @@ clean_gdp_capita_volumes <-
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 #FILTER VECTORS
-demand_graph_code <- list(clean_demand_market_size, clean_subcategories, clean_subcategories,
+demand_graph_code <- list(clean_total_market_value, 
+                          clean_demand_market_size, clean_subcategories, clean_subcategories,
                           clean_volume_parallel, clean_gdp_capita_volumes)
-demand_graph_choice<- c("Percentage of Snack Revenue", "Subcategories of Case Study - Values",
+demand_graph_choice<- c("Total Market Value", "Percentage of Snack Revenue", "Subcategories of Case Study - Values",
                         "Subcategories of Case Study - %", "Volumes Demanded", 
                         "GDP per Capita w.r.t Retail Volumes")
 
@@ -1899,7 +1913,7 @@ demand_graph_server <- function(input, output){
     if(input$demand_selection == demand_graph_choice[1]){
       tagList(
         chooseSliderSkin("Flat", color = '#db240c'),
-        sliderInput(inputId = "demand_cat_rev_year_slider",
+        sliderInput(inputId = "market_val_year_slider",
                     label = "Year Interval",
                     min = 2010,
                     max = 2024,
@@ -1911,6 +1925,20 @@ demand_graph_server <- function(input, output){
       )
     }
     else if(input$demand_selection == demand_graph_choice[2]){
+      tagList(
+        chooseSliderSkin("Flat", color = '#db240c'),
+        sliderInput(inputId = "demand_cat_rev_year_slider",
+                    label = "Year Interval",
+                    min = 2010,
+                    max = 2024,
+                    value = c(2010,2024),
+                    step = 1,
+                    sep = "",
+                    dragRange = TRUE
+                    )
+      )
+    }
+    else if(input$demand_selection == demand_graph_choice[3]){
       tagList(
         chooseSliderSkin("Flat", color = '#db240c'),
         sliderInput(inputId = "demand_subcat_value_year_slider",
@@ -1930,7 +1958,7 @@ demand_graph_server <- function(input, output){
                     )
       )
     }
-    else if(input$demand_selection == demand_graph_choice[3]){
+    else if(input$demand_selection == demand_graph_choice[4]){
       tagList(
         chooseSliderSkin("Flat", color = '#db240c'),
         sliderInput(inputId = "demand_subcat_percent_year_slider",
@@ -1950,7 +1978,7 @@ demand_graph_server <- function(input, output){
                     )
       )
     }
-    else if(input$demand_selection == demand_graph_choice[4]){
+    else if(input$demand_selection == demand_graph_choice[5]){
       tagList(
         chooseSliderSkin("Flat", color = '#db240c'),
         sliderInput(inputId = "demand_vol_demand_year_slide",
@@ -1964,7 +1992,7 @@ demand_graph_server <- function(input, output){
                     )
       )
     }
-    else if(input$demand_selection == demand_graph_choice[5]){
+    else if(input$demand_selection == demand_graph_choice[6]){
       tagList(
         chooseSliderSkin("Flat", color = '#db240c'),
         sliderInput(inputId = "gdp_capita_demand_year_slide",
@@ -1984,6 +2012,13 @@ demand_graph_server <- function(input, output){
     temp <- demand_selected()
     
     if(input$demand_selection == demand_graph_choice[1]){
+      req(input$market_val_year_slider)
+      
+      temp <-
+        temp[[1]] %>% 
+        filter(Year >= input$market_val_year_slider[1], Year <= input$market_val_year_slider[2])
+    }
+    else if(input$demand_selection == demand_graph_choice[2]){
       req(input$demand_cat_rev_year_slider)
       
       temp <-
@@ -1991,7 +2026,7 @@ demand_graph_server <- function(input, output){
         filter(Year >= input$demand_cat_rev_year_slider[1], Year <= input$demand_cat_rev_year_slider[2])
     }
     
-    else if(input$demand_selection == demand_graph_choice[2]){
+    else if(input$demand_selection == demand_graph_choice[3]){
      req(input$demand_subcat_value_year_slider)
       
       temp <-
@@ -2003,7 +2038,7 @@ demand_graph_server <- function(input, output){
                     values_from = Value) %>% 
         mutate_all(~ replace(., is.na(.), 0))
     } 
-    else if(input$demand_selection == demand_graph_choice[3]){
+    else if(input$demand_selection == demand_graph_choice[4]){
        req(input$demand_subcat_percent_year_slider)
       
       temp <-
@@ -2019,14 +2054,14 @@ demand_graph_server <- function(input, output){
                     values_from = subcat_percent) %>%
         mutate_all(~ replace(., is.na(.), 0))
     }
-    else if(input$demand_selection == demand_graph_choice[4]){
+    else if(input$demand_selection == demand_graph_choice[5]){
       req(input$demand_vol_demand_year_slide)
       
       temp <-
         temp[[1]] %>% 
         filter(Year >= input$demand_vol_demand_year_slide[1], Year <= input$demand_vol_demand_year_slide[2])
     }
-    else if(input$demand_selection == demand_graph_choice[5]){
+    else if(input$demand_selection == demand_graph_choice[6]){
       req(input$gdp_capita_demand_year_slide)
       
       temp <-
@@ -2042,6 +2077,36 @@ demand_graph_server <- function(input, output){
   output$demand_highchart <-
     renderHighchart({
       if(input$demand_selection == demand_graph_choice[1]){
+        demand_filtered_graph() %>% 
+          hchart("line", hcaes(`Year`, tot_market_value)) %>% 
+          hc_title(text = "Snack Market Aggregate Value [mil €]") %>% 
+          lnplot_custom(.) %>% 
+          hc_yAxis(title = list(text = "<b>Snack Market Aggregate Value<br>[mil €]</b>", align = "middle"),
+                   labels = list(formatter = JS("function() {
+                                             if (this.value) {
+                                               return (this.value) + ' mil €';
+                                             } 
+                                           }")
+                                )
+                   ) %>% 
+          hc_xAxis(title = list(text = "<b>Year</b>", align = "middle"),
+                   labels = list(formatter = JS("function() {
+                                             if (this.value) {
+                                               return (this.value+2010);
+                                             } 
+                                           }")
+                                )) %>% 
+          hc_tooltip(., 
+               headerFormat = "",
+               pointFormat = 
+                 "<b>{point.name}</b><br>Snack Market Aggregate Value: {point.y:.1f} mil €") %>% 
+          hc_caption(
+            text = "<b>Snack Market Aggregate Value</b> = aggregate retail revenues of all snack categories in Portugal.",
+            style = list(marginTop = "0px")
+          )
+          
+      }
+      else if(input$demand_selection == demand_graph_choice[2]){
         temp <- demand_filtered_graph()
         
         hc_data <- 
@@ -2079,7 +2144,7 @@ demand_graph_server <- function(input, output){
                      valueDecimals = 1)
         
       }
-      else if(input$demand_selection == demand_graph_choice[2]){
+      else if(input$demand_selection == demand_graph_choice[3]){
         temp <- demand_filtered_graph()
         
         hc_data <- 
@@ -2117,7 +2182,7 @@ demand_graph_server <- function(input, output){
                      valueSuffix = " mil €",
                      valueDecimals = 1)
       }
-      else if(input$demand_selection == demand_graph_choice[3]){
+      else if(input$demand_selection == demand_graph_choice[4]){
         temp <- demand_filtered_graph()
         
         hc_data <- 
@@ -2154,7 +2219,7 @@ demand_graph_server <- function(input, output){
                      valueSuffix = "%",
                      valueDecimals = 1)
       }
-      else if(input$demand_selection == demand_graph_choice[4]){
+      else if(input$demand_selection == demand_graph_choice[5]){
         demand_filtered_graph() %>% 
           group_by(Category) %>% 
           hchart("line", hcaes(x = `Year`, y = `Indexed_Ratio`, group = Category)) %>% 
@@ -2185,7 +2250,7 @@ demand_graph_server <- function(input, output){
             style = list(marginTop = "0px")
           )
       }
-      else if(input$demand_selection == demand_graph_choice[5]){
+      else if(input$demand_selection == demand_graph_choice[6]){
         temp <- demand_filtered_graph()
         
         highchart() %>% 
@@ -2251,21 +2316,67 @@ shinyApp(ui = demand_graph_ui, server = demand_graph_server)
 
 ## Snack Demand - Text {.tabset .tabset-fade}
 
-### **Demand 1/2**
+### **Demand 1/2** 
 
-filler
+#### **Portuguese Market Growth**
+
+- Steady growth from €1,617M in 2010 to a projected €2,210M by 2024.
+- **Four Main Categories**:
+  - Confectionery **→** Largest share, €109M growth, with a slight decline in share from 31.6% (2010) to 28.1% (2024).
+  - Ice Cream **→** Robust growth of €190M since 2010.
+  - Savory Snacks **→** Largest proportional growth (+59.6%), increasing share from 18.8% (2010) to 21.9% (2024).
+  - Sweet Biscuits, Snack Bars, and Fruit Snacks **→** Decline in share from 25.1% (2015) to 23.5% (2024).
+    - Sweet Biscuits:
+      - Largest contributor to its category, growing from €334M (2010) to €370M (2024).
+      - Plain biscuits are the main driver, rising from €155M (2010) to €183M (2024).
+    - Fruit Snacks **→** Steady growth from €24M (2010) to €92M (2024).
+    - Snack Bars **→** Modest growth from €48M (2010) to €57M (2024), remaining a smaller segment.
+- **Overall Trends**:
+  - All four subcategories show consistent growth, with a more balanced distribution of market share compared to 2010.
+
+<div style="height: 40px;"></div>
+
+#### **Average Price w.r.t Snack Volume Output**
+
+- **Consistent Demand Growth** <br>Sweet Snacks show steady demand growth despite gradual price increases, indicating inelastic demand.
+- **Consumer Perception** <br>Viewed as essential or habitual, with minimal sensitivity to price changes.
+- **Weak Substitution Effects** <br>Demand is unaffected by price drops in other snack categories, suggesting Sweet Snacks meet unique consumer needs (e.g., convenience, perceived health benefits, versatility).
+- **Temporary Dip in Demand (2017-18)** <br>Likely due to short-term factors but followed by a rapid recovery, affirming Sweet Snacks' appeal.
+- **Consumer Loyalty** <br>Strong consumer loyalty contributes to inelasticity and stable demand.
+- **Investment Potential** <br>Sweet Snacks are a promising segment for investment and development due to their market stability.
+- **Market Resilience** <br>The combination of inelastic demand and weak substitution effects underlines Sweet Snacks’ robustness as a market category.
 
 ### **Demand 2/2**
 
-filler
+#### **Income and Consumption**
+
+- **Strong Income-Consumption Correlation** <br>A correlation coefficient of 0.82 (CI: 0.53–0.94) shows a strong relationship between GDP per capita and snack consumption (2010–2023).
+- **Snacks as Normal Goods** <br>Consumption increases with rising income, indicating snacks are normal goods.
+- **Changing Consumer Behaviours** <br>Snacking has become more integrated into daily life as living standards in Portugal improve.
+- **Resilience During Economic Downturns** <br>Snack consumption continued to grow during the 2020 COVID-19 crisis, even as GDP per capita dropped to 2016 levels.
+- **Lockdown Influence** <br>Lockdowns reinforced snacking habits, with consumers seeking comfort and convenience while spending more time at home.
+- **Deeply Embedded Habits** <br>Snacking habits appear resilient to short-term income fluctuations.
+- **Evidence of Market Stability** <br>The consistent upward trajectory of snack consumption highlights the market's robustness and integration into consumer lifestyles.
+
+<div style="height: 15px;"></div>
+
+#### **Shift in Lifestyle**
+
+- **Rising Vegetarianism** <br>Vegetarianism in Portugal increased by over 400% from 2007 to 2017, signaling a significant dietary shift.
+- **Veganism on the Rise** <br>Veganism is gaining popularity, particularly among young adults (25–30 years old) and women.
+- **Flexitarian Movement** <br>Many identify as flexitarians, reducing meat consumption without strictly adhering to vegetarian or vegan diets.
+- **Public Policy Support** <br>Legislation mandates vegan options in public canteens, supporting the demand for plant-based products.
+- **Environmental and Ethical Awareness** <br>Awareness of environmental issues and animal welfare, boosted by public figures, drives interest in plant-based diets.
+- **Low Overall Adoption** <br>Despite growth, vegetarians and vegans remain a minority compared to omnivores in Portugal.
+- **Opportunities for Food Companies** <br>Companies must innovate and expand plant-based offerings to meet growing consumer demand.
 
 <!-- COMPANY PAGE -->
 
 # Vieira de Castro & Filhos Lda.
 
-## Vieira - Text & Stats {data-width="1000"}
+## Vieira - Text & Stats {data-width="1100"}
 
-### **Information** {data-height="900"}
+### **Information** 
 
 filler
 
@@ -2273,71 +2384,146 @@ filler
 
 filler
 
-```{r VIEIRA GAUGES}
-highchart() %>%
-  # Set chart type to solid gauge
-  hc_chart(type = "solidgauge") %>%
-  
-  # Define the pane (background arc)
-  hc_pane(
-    startAngle = -90,
-    endAngle = 90,
-    background = list(
-      outerRadius = "112%",
-      innerRadius = "88%",
-      shape = "arc",
-      borderWidth = 0,
-      backgroundColor = "#EEE"
-    )
-  ) %>%
-  
-  # Define the y-axis (value range)
-  hc_yAxis(
-    min = 0,
-    max = 100,
-    title = list(text = "Performance"),
-    stops = list(
-      list(0.1, "#DF5353"),  # Red
-      list(0.5, "#DDDF0D"),  # Yellow
-      list(0.9, "#55BF3B")   # Green
-    ),
-    lineWidth = 0,
-    tickInterval = 10,
-    labels = list(enabled = TRUE)
-  ) %>%
-  
-  # Add the data as a series
-  hc_add_series(
-    data = list(65),  # Value for the gauge
-    name = "Performance",
-    dataLabels = list(
-      format = "<div style='text-align:center'><span style='font-size:25px;color:black'>{y}%</span></div>"
-    )
-  ) %>%
-  
-  # Additional tooltip settings
-  hc_tooltip(
-    enabled = TRUE,
-    valueSuffix = "%"
-  )
 
 
-```
 
 
 ## Vieira - Images
 
 ### **Images**
 
+```{r VIEIRA GRAPH}
+#CLEAN DATASETS
+clean_vieira_share <-
+  xlsx_dsets[["portugal_company_shares"]] %>% 
+  filter(Company == "Vieira de Castro Produtos Alimentares SA") %>% 
+  select(-Country, -Unit, -Company) %>% 
+  pivot_longer(cols = -Category,
+               names_to = "Year",
+               values_to = "share_val") %>% 
+  mutate(share_val = as.numeric(share_val), Year = as.numeric(Year))%>% 
+  group_by(Year) %>% 
+  mutate(Total = sum(share_val)) %>% 
+  ungroup(Year) 
+
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+vieira_graph_ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      width = 4,
+      chooseSliderSkin("Flat", color = '#db240c'),
+      sliderInput(inputId = "vieira_year_slider",
+                  label = "Year Interval",
+                  min = 2015,
+                  max = 2024,
+                  value = 2015,
+                  step = 1,
+                  sep = "",
+                  dragRange = TRUE
+                  )
+    ),
+    mainPanel(
+      width = 6,
+      highchartOutput("vieira_highchart")
+    ),
+    position = "left"
+  )
+)
+
+vieira_graph_server <- function(input, output){
+  filtered_vieira <- reactive({
+    req(input$vieira_year_slider)
+
+    temp <-
+      clean_vieira_share %>%
+      filter(Year == input$vieira_year_slider)
+  })
+
+  output$vieira_highchart <- renderHighchart({
+    temp <- filtered_vieira()
+    
+    hchart(temp, type = "column", hcaes(x = "Total", y = share_val, color = Category)) %>%
+    hc_plotOptions(
+      series = list(
+        stacking = "normal"  # This ensures the values are stacked
+      )
+    ) %>% 
+    barplot_custom(.)
+  })
+}
+
+shinyApp(ui = vieira_graph_ui, server = vieira_graph_server)
+
+```
+
 <!-- CONCLUSIONS PAGE -->
 
 # Conclusions
 
-## **Datasets Used**
+## 
 
-###
+### **Datasets Used**
 
-filler
+```{r DATASETS REACTABLE}
+#DATASETS
+dataset_graph_choice <- c("Consumer Price Index","Daily Caloric Supply","GDP Constant",
+                          "GDP Per Capita","HDI","Inflation","Life Expectancy","Migrant Stock",
+                          "Overweight Adults","Population","Population Density","Population Growth Rate",
+                          "Population Poverty","Real GDP","Unemployment Rate","Company Shares","ESTAT Dataframe",
+                          "Retail Volume Price","Snack Subcategories")
+  
+dataset_graph_code <- append(dsets, xlsx_dsets)
+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
+#UI AND SERVER LOGIC
+
+datasets_graph_ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      width = NULL,
+      pickerInput(
+        inputId = "dataset_selection",
+        label = "Raw Datasets",
+        choices = dataset_graph_choice,
+        selected = dataset_graph_choice[1],
+        options = list(style = "btn-danger"),
+        width = "100%"
+      )
+    ),
+    mainPanel(
+      width = NULL,
+      reactableOutput("dataset_reactable")
+    ),
+    position = "left"
+  )
+)
+
+
+dataset_graph_server <- function(input, output){
+  selected_dataset <- reactive({
+    req(input$dataset_selection)
+    
+    temp <- dataset_graph_code[dataset_graph_choice %in% input$dataset_selection]
+  })
+  
+  output$dataset_reactable <- renderReactable({
+    temp <- selected_dataset()
+    temp <- 
+      temp[[1]] %>% 
+      reactable(
+        .,
+        paginationType = "jump",
+        searchable = TRUE, 
+        highlight = TRUE,
+        theme = reactableTheme("material"))
+  })
+}
+
+shinyApp(ui = datasets_graph_ui, server = dataset_graph_server)
+
+```
 
 ## Conclusion Tab {.tabset .tabset-fade}
 
@@ -2390,41 +2576,6 @@ https://www.geeksforgeeks.org/if-else-if-statement-in-r/
 ###
 
 ```{r TESTER}
-
-# hc_data <- 
-#   lapply(
-#     names(clean_subcategories)[-1], 
-#     function(company) {
-#       list(name = company, data = as.numeric(clean_subcategories[[company]]))
-#     }
-#   ) 
-# 
-# highchart() %>%
-#               hc_chart(type = "column") %>%
-#               hc_title(text = "Market Concentration [%]") %>%
-#               hc_plotOptions(column = list(stacking = "normal")) %>%
-#               hc_add_series_list(hc_data) %>%
-#               barplot_custom(.) %>% 
-#               hc_xAxis(categories = clean_subcategories$Category) %>%
-#               hc_yAxis(title = list(text = "<b>Aggregate Share Value [%]</b>", align = "middle"),
-#                        min = 0,
-#                        labels = list(
-#                                  formatter = JS("function() {
-#                                      if (this.value) {
-#                                        return (this.value) + '%';
-#                                      } 
-#                                    }")
-#                                 )
-#                        ) %>%
-              # hc_colors(c("#db240c","#FFE900", "#FFB900","#046A38", "#05fc83")) %>%
-#               hc_caption(
-#                 text = "<b>N-Indexed Market Concentration</b> = sum of share value of the first n companies, share value expressed in terms of % of total market value.<br>Indicative of market concentration, the greater the value for small n, the more tendentially monopolistic the market.",
-#                 style = list(marginTop = "0px")
-#               ) %>% 
-#             hc_tooltip(shared = FALSE,
-#                        valueSuffix = "%",
-#                        valueDecimals = 1)
-
 
 ```
 
