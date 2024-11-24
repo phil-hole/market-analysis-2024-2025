@@ -22,6 +22,12 @@ runtime: shiny
   }
 </style>
 
+<!-- GITHUB REPOSITORY LINK 
+     
+-->
+
+
+
 ```{r SETUP, message=FALSE, include=FALSE}
 #GENERAL CODE CHUNK SETUP
 knitr::opts_chunk$set(echo = FALSE, message=FALSE)
@@ -193,12 +199,12 @@ Fruit Snacks, Snack Bars, Sweet Biscuits in Portugal and the strategy of *Vieira
 Index <- 
   data.frame(
     parent = c(rep("Socio-Demographic Analysis", 4), rep("Economic Overview", 3), rep("Supply", 3),
-               rep("Demand", 4), rep("Vieira de Castro & Filhos Lda.", 2)),
+               rep("Demand", 4), rep("Vieira de Castro & Filhos Lda.", 3)),
     child = c("Demographic Data", "General Health","Portuguese Economy", "Parallel with Italy and Spain",
               "Real GDP and RGDP Growth Rate", "Unemployment Rate","Inflation Rate",
               "Until 2012", "From 2016 to 2018", "2022 - COVID19 Effect",
               "Snack Categories", "Category Retail Revenue", "Price-Volume Variations", "Income-Volume Variations",
-              "A", "B"
+              "Brand", "Products", "Competitors"
               )
   )
 
@@ -307,7 +313,7 @@ clean_population <-
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
-         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population: {point.y:.f} inhab") %>% 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population: {point.y:,.f} inhab") %>% 
   hc_caption(
     text = "<b>Population</b> = number of inhabitants of a country, at any given year.",
     style = list(marginTop = "0px")
@@ -327,7 +333,7 @@ clean_population_density <-
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
-         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population Density: {point.y:.1f} inhab/kmsq") %>% 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Population Density: {point.y:,.1f} inhab/kmsq") %>% 
   hc_caption(
     text = "<b>Population Density</b> = population per square kilometer by country.",
     style = list(marginTop = "0px")
@@ -357,7 +363,7 @@ clean_immigration <-
   hc_tooltip(., 
        headerFormat = "",
        pointFormat = 
-         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Immigrant Stock: {point.y:.f} inhab") %>% 
+         "<b>{point.name}</b><br>Year: {point.x:.f}<br>Immigrant Stock: {point.y:,.f} inhab") %>% 
      hc_caption(
     text = "<b>International Immigration Stock</b> = people living in a given country who were born in another country, recorded at mid-year by age and sex and by region, country or area of destination.",
     style = list(marginTop = "0px")
@@ -540,7 +546,7 @@ shinyApp(ui = health_graph_ui, server = health_graph_server)
 - Shows a general upward trend, with deviations during global crises (e.g., 2008 banking crisis, 2020 COVID-19   pandemic).
 - Reflects improving living conditions and greater attainable wealth for individuals.
 
-**Human Development Index (HDI**:
+**Human Development Index (HDI)**:
 
 - Introduced to address GDP per capita's limitations in capturing broader social factors.
 - Confirms the trend of gradual growth in living standards, with minimal time-based variation.
@@ -1020,7 +1026,14 @@ economics_graph_server <- function(input, output){
                                   }")
                                 )
                     ) %>%
-            hc_xAxis(title=list(text="<b>Year [Quarters per Year]</b>", align="middle")) %>%
+            hc_xAxis(title=list(text="<b>Year</b>", align="middle"),
+                     labels = list(
+                                formatter = JS("function() {
+                                    if (this.value) {
+                                      return ((this.value/4)+1995);
+                                    }
+                                  }")
+                                )) %>%
             hc_tooltip(.,
                  headerFormat = "",
                  pointFormat =
@@ -1035,12 +1048,26 @@ economics_graph_server <- function(input, output){
             hchart("line", hcaes(`Year`, `Real GDP Growth Rate`)) %>%
             hc_title(text = "Portuguese Real GDP Growth Rate") %>%
             lnplot_custom(.) %>%
-            hc_yAxis(title=list(text="<b>Real GDP Growth Rate [%]</b>", align="middle")) %>%
-            hc_xAxis(title=list(text="<b>Year [Quarters per Year]</b>", align="middle")) %>%
+            hc_yAxis(title=list(text="<b>Real GDP Growth Rate [%]</b>", align="middle"),
+                     labels = list(
+                      formatter = JS("function() {
+                          if (this.value) {
+                            return (this.value) + '%';
+                          }
+                        }")
+                      )) %>%
+            hc_xAxis(title=list(text="<b>Year</b>", align="middle"),
+                     labels = list(
+                                formatter = JS("function() {
+                                    if (this.value) {
+                                      return ((this.value/4)+1995);
+                                    }
+                                  }")
+                                )) %>%
             hc_tooltip(.,
                  headerFormat = "",
                  pointFormat =
-                   "<b>{point.name}</b><br>Year: {point.x:.f}<br>Real GDP Growth Rate: {point.y:.1f}%"
+                   "<b>{point.name}</b><br>Real GDP Growth Rate: {point.y:.1f}%"
             ) %>%
             hc_caption(
               text = "<b>Real GDP Growth Rate</b> = growth rate of real GDP calculated year by year.",
@@ -1051,7 +1078,14 @@ economics_graph_server <- function(input, output){
             hchart("line", hcaes(`Year`, `Unemployment Rate`)) %>%
             hc_title(text = "Portuguese Unemployment Rate") %>%
             lnplot_custom(.) %>%
-            hc_yAxis(title=list(text="<b>Unemployment Rate [%]</b>", align="middle")) %>%
+            hc_yAxis(title=list(text="<b>Unemployment Rate [%]</b>", align="middle"),
+                     labels = list(
+                      formatter = JS("function() {
+                          if (this.value) {
+                            return (this.value) + '%';
+                          }
+                        }")
+                      )) %>%
             hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
             hc_tooltip(.,
                  headerFormat = "",
@@ -1066,7 +1100,14 @@ economics_graph_server <- function(input, output){
             hchart("line", hcaes(`Year`, `Inflation Rate`)) %>%
             hc_title(text = "Portuguese Inflation Rate") %>%
             lnplot_custom(.) %>%
-            hc_yAxis(title=list(text="<b>Inflation Rate [%]</b>", align="middle")) %>%
+            hc_yAxis(title=list(text="<b>Inflation Rate [%]</b>", align="middle"),
+                     labels = list(
+                      formatter = JS("function() {
+                          if (this.value) {
+                            return (this.value) + '%';
+                          }
+                        }")
+                      )) %>%
             hc_xAxis(title=list(text="<b>Year</b>", align="middle")) %>%
             hc_tooltip(.,
                  headerFormat = "",
@@ -1112,9 +1153,8 @@ shinyApp(ui = economics_graph_ui, server = economics_graph_server)
   - Unemployment surged to 16%, then returned to the 5%-10% range after the crisis.
 - Global Pandemic Impact:
   - Unemployment saw a similar spike during the pandemic but later stabilized.
-- Recent Trends (Post-2022):
-  - Rapid rebound in labour participation, signaling recovery and growing confidence in the job market.
-  - Increase in unemployment during recovery attributed to mismatches between labour demand and supply,         including skill gaps and regional disparities.
+- Recent Trends:
+  - Builing rebound in labour participation, signaling recovery and growing confidence in the job market.
 
 ### **Inflation Rate**
 
@@ -1498,7 +1538,7 @@ supply_graph_server <- function(input, output){
         hc_tooltip(.,
              headerFormat = "",
              pointFormat =
-               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Enterprises: {point.y:.f}"
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Enterprises: {point.y:,.f}"
              ) %>% 
         hc_caption(
           text = "<b>Active Enterprises</b> = number of enterprises active in the food manufacture market in a given year.<br>Eurostat Codes: sbs_na_sca_r2; sbs_sc_ovw",
@@ -1526,7 +1566,7 @@ supply_graph_server <- function(input, output){
         hc_tooltip(.,
              headerFormat = "",
              pointFormat =
-               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Employees: {point.y:.f}"
+               "<b>{point.name}</b><br>Year: {point.x:.f}<br>N° Employees: {point.y:,.f}"
              ) %>% 
         hc_caption(
           text = "<b>N° Employees</b> = number of employees working for enterprises active in the food manufacture market in a given year.<br>Eurostat Codes: sbs_na_sca_r2; sbs_sc_ovw",
@@ -1569,7 +1609,7 @@ supply_graph_server <- function(input, output){
         hc_title(text = "Gross Operating Surplus [mil €]") %>%
         lnplot_custom(.) %>% 
         hc_yAxis(title=list(
-                         text="<b>Gross Operating Surplus [mil €]</b>", 
+                         text="<b>Gross Operating Surplus<br>[mil €]</b>", 
                          align="middle"
                        ),
                  labels = list(
@@ -1649,6 +1689,7 @@ supply_graph_server <- function(input, output){
         )
     }
     else if(input$supply_selection == supply_graph_choice[8]){
+        req(input$supply_company_index_slider)
         if(input$company_share_selection == "Average Share Value"){
           supply_filtered_graph() %>% 
             hchart("line", hcaes(Year, Mean_Value)) %>%
@@ -2171,7 +2212,7 @@ demand_graph_server <- function(input, output){
                                }")
                             )
                    ) %>%
-          hc_colors(c("#db240c","#FFE900", "#FFB900",colorRampPalette(c("#046A38", "#05fc83"))(5))) %>%
+          hc_colors(c("#db240c","#FFE900", "#FFB900",colorRampPalette(c("#05fc83", "#046A38"))(5))) %>%
           hc_size(height = 400) %>% 
           hc_caption(
             text = 
@@ -2209,7 +2250,7 @@ demand_graph_server <- function(input, output){
                                }")
                             )
                    ) %>%
-          hc_colors(c("#db240c","#FFE900", "#FFB900",colorRampPalette(c("#046A38", "#05fc83"))(5))) %>%
+          hc_colors(c("#db240c","#FFE900", "#FFB900",colorRampPalette(c("#05fc83", "#046A38"))(5))) %>%
           hc_size(height = 400) %>% 
           hc_caption(
             text = "<b>Retail Revenues Percentage</b> = individual contributions of other categories of snacks to the total market value, expressed as percentages.<br>Variations in consumer preferences shown by variations in snack category consumption.",
@@ -2374,37 +2415,89 @@ shinyApp(ui = demand_graph_ui, server = demand_graph_server)
 
 # Vieira de Castro & Filhos Lda.
 
-## Vieira - Text & Stats {data-width="1100"}
+## Vieira - Text & Stats {.tabset .tabset-fade data-width="950"}
 
-### **Information** 
+### **Vieira 1/2**
 
-filler
+#### **Brand Identity**
 
-### **Stats**
+- Family-owned business, focusing on local markets while emphasizing its distinction from larger multinational corporations.
+- Singular subsidiary in Jordan, avoids aggressive expansion strategies of global competitors.
 
-filler
+#### **Product Market**
 
+- Portugal’s snack market in 2024 has been polarized between health-conscious products and indulgent treats.
+- Vieira de Castro has introduced the CLabel+ (“clean label”) project, focusing on wellness with products like no-sugar, lactose-free, and fibre-rich options.
+  - It offers premium, affordable snacks priced under €7.50 to cater to consumer demand for indulgence and affordability.
+- Strong trend towards eco-friendly practices, with Vieira de Castro adopting more environmentally friendly packaging.
+- Despite economic caution, the snack sector (biscuits, almonds, chocolates) continues to perform well, with positive growth in the sweet biscuits segment.
+- Vieira de Castro continuously innovates, focusing on sustainability, premium positioning, and new flavors, especially in almonds.
+- Key market trends: Health & Wellness (sugar-free/gluten-free snacks), Indulgence (chocolate biscuits), and Sustainability (eco-friendly packaging).
 
+<!-- <div style="height: 30px;"></div> -->
 
+#### **Logo and Products**
 
+- Packaging, design and coloration all indicative of Vieira's market strategy:
+<br><br>
 
-## Vieira - Images
+<img src="./vieira.jpg" alt="Image 1" style="width: 40%; height: auto;">
+<img src="./vieira_products.jpeg" alt="Image 2" style="width: 40%; height: auto;">
 
-### **Images**
+### **Vieira 2/2**
+
+#### **Production Line**
+
+- Vieira de Castro offers a diverse product range, including biscuits and coated almonds, catering to indulgent needs.
+- Products are priced transparently and align with the growing health trend in Portugal.
+- Product line divided into two sub-categories:
+  - Confectionery products: Includes sweets, savoury and sweet crackers, biscuits, and chocolate-coated almonds, suitable for on-the-go consumption.
+  - "Chef" line: Culinary products for use as mix-ins and toppings (e.g., yogurt, baked goods).
+
+#### **Target Audience**
+
+- Vieira de Castro targets a broad consumer base across different age groups and socioeconomic segments.
+- This approach aligns with the broader snack market trend in Portugal.
+- Despite inflation, consumers are seeking affordable indulgence.
+- There is also a rise in demand for private label brands and health-conscious options.
+
+#### **Distribution Channels**
+
+- Vieira de Castro sells products both online and in supermarkets, reflecting broader trends in Portugal.
+- Generally, snack sales in Portugal have as primary promoter supermarkets and local grocers, with physical stores being a key channel for impulse buys.
+  - The company having these as distribution channels is indicative of its efforts in maximising its consumer-base.
+- E-commerce remains limited for snack retail, so the company maintains a strong physical store presence.
+- Internationally, Vieira de Castro operates through a subsidiary in Jordan and works with resellers in Brazil and the US.
+- The product line remains largely unchanged in international markets.
+
+#### **Competitiors**
+
+- Vieira de Castro dominates in the Sweet Biscuits, Snack Bars, Fruit Snacks, and Confectionery sectors.
+- Faces competition from international brands like Mondelez (Oreo, Milka), Ferrero (Kinder, Ferrero Rocher), and Nestlé (Kit Kat), which have strong brand recognition     and extensive distribution networks.
+- Competes locally with Portuguese companies like Imperial and Lusiteca in the sweet biscuits and confectionery categories.
+- Vieira de Castro holds a modest 1.0% market share in Portugal, particularly strong in sweet biscuits and snack bars, competing with Mondelez's sub-brands.
+- Local competitors:
+  - Imperial Produtos Alimentares: Holds 1.0% of the market and 3.5% in Confectionery.
+  - Lusiteca: Market share declined from 1.2% in 2015 to 0.7% in 2024, with a 2.6% share in Confectionery.
+  - Vieira de Castro’s products are known for their quality and Portuguese heritage, resonating well with local consumers.
+  
+## Vieira - Graph
+
+### **Vieira Market Share Composition**
 
 ```{r VIEIRA GRAPH}
 #CLEAN DATASETS
 clean_vieira_share <-
-  xlsx_dsets[["portugal_company_shares"]] %>% 
-  filter(Company == "Vieira de Castro Produtos Alimentares SA") %>% 
-  select(-Country, -Unit, -Company) %>% 
+  xlsx_dsets[["portugal_company_shares"]] %>%
+  filter(Company == "Vieira de Castro Produtos Alimentares SA") %>%
+  select(-Country, -Unit, -Company) %>%
   pivot_longer(cols = -Category,
                names_to = "Year",
-               values_to = "share_val") %>% 
-  mutate(share_val = as.numeric(share_val), Year = as.numeric(Year))%>% 
+               values_to = "share_val") %>%
+  mutate(share_val = as.numeric(share_val), Year = as.numeric(Year)) %>% 
   group_by(Year) %>% 
-  mutate(Total = sum(share_val)) %>% 
-  ungroup(Year) 
+  mutate(Total = sum(share_val)) %>%
+  ungroup(Year)
 
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
@@ -2421,7 +2514,14 @@ vieira_graph_ui <- fluidPage(
                   value = 2015,
                   step = 1,
                   sep = "",
-                  dragRange = TRUE
+                  dragRange = TRUE,
+                  animate =
+                    animationOptions(
+                                interval = 1500,  
+                                loop = FALSE,     
+                                playButton = TRUE
+                                
+                    )
                   )
     ),
     mainPanel(
@@ -2443,14 +2543,35 @@ vieira_graph_server <- function(input, output){
 
   output$vieira_highchart <- renderHighchart({
     temp <- filtered_vieira()
-    
-    hchart(temp, type = "column", hcaes(x = "Total", y = share_val, color = Category)) %>%
-    hc_plotOptions(
-      series = list(
-        stacking = "normal"  # This ensures the values are stacked
-      )
-    ) %>% 
-    barplot_custom(.)
+
+    hchart(temp, type = "column", hcaes(x = "Total", y = share_val, group = Category)) %>%
+    hc_title(text = "Vieira - Share Value [% Market Value]") %>%
+    hc_plotOptions(series = list(stacking = "normal")) %>% 
+    barplot_custom(.) %>% 
+    hc_xAxis(title = list(text = paste0(input$vieira_year_slider), align = "middle"),
+             labels = list(
+                       formatter = JS("function() {
+                           if (this.value) {
+                             return '';
+                           } 
+                         }")
+                      )) %>% 
+    hc_yAxis(title = list(text = "<b>Share Value [% Market Value]</b>", align = "middle"),
+             min = 0, max = 5,
+             labels = list(
+                       formatter = JS("function() {
+                           if (this.value) {
+                             return (this.value) + '%';
+                           } 
+                         }")
+                      )
+             ) %>% 
+    hc_colors(., c("#FFE900", "#046A38","#db240c",  "#002D72")) %>% 
+    hc_size(height = 400) %>% 
+    hc_tooltip(shared = TRUE,
+               headerFormat = paste0(input$vieira_year_slider, "<br>"),
+               valueSuffix = "%",
+               valueDecimals = 1)
   })
 }
 
@@ -2527,55 +2648,83 @@ shinyApp(ui = datasets_graph_ui, server = dataset_graph_server)
 
 ## Conclusion Tab {.tabset .tabset-fade}
 
-### **Conclusions**
+### **Conclusions 1/2**
 
-filler
+#### **Socio-Economic Foundations for Growth**
+
+Portugal's socio-economic evolution has created a strong foundation for businesses in the food sector, driven by rising life expectancy, economic resilience, and improved purchasing power. These factors, especially following recoveries from the 2008 financial crisis and the COVID-19 pandemic, provide fertile ground for both essential and indulgent products.
+<br><br>
+
+#### **Steady Market Growth** 
+
+The sweet snack market in Portugal has grown steadily, fueled by demand among working-age adults who prioritize convenience, indulgence, and healthier options. While traditional products like biscuits continue to hold appeal, there is a growing shift towards alternative options such as low-calorie, sugar-free, and plant-based snacks, which reflects broader global dietary trends.
+<br><br>
+
+#### **Vieira de Castro’s Strategic Balance**
+
+Vieira de Castro has successfully maintained a balance between its traditional offerings and emerging consumer demands. The company has built a strong reputation and loyal customer base, which supports its position in the market. However, to sustain growth in the increasingly competitive landscape, the company must adapt further.
+<br><br>
+
+#### **Expanding Product Range for Health-Conscious Consumers**
+
+To meet the rising demand for healthier snacks, Vieira de Castro should focus on expanding its range of entirely plant-based products, driven by both health and environmental concerns. Additionally, innovations in gluten-free, high-protein, or reduced-sugar snacks would cater to the growing segment of health-conscious consumers, ensuring the company remains aligned with evolving market preferences.
+<br><br>
+
+#### **Sustainability**
+
+Sustainability represents another key area where Vieira de Castro must improve. As consumer awareness of environmental issues grows, investing in eco-friendly packaging and transparent sustainability initiatives is essential. These actions could strengthen the company’s market position while aligning with broader industry trends toward environmental responsibility.
+<br><br>
+
+### **Conclusions 2/2**
+
+#### **Role of Innovation and Diversification**
+
+Innovation will play a crucial role in sustaining Vieira de Castro’s growth. By diversifying its product offerings, particularly in the plant-based and health-conscious snack categories, the company can appeal to new consumer segments while maintaining its commitment to quality and flavor.
+<br><br>
+
+#### **Adapting to Consumer Preferences**
+
+Portugal's evolving consumer preferences create significant opportunities for growth in the snack sector. The demand for healthier, plant-based options combined with indulgent treats presents a dynamic market that Vieira de Castro can continue to tap into. Adapting to these preferences will ensure the company remains competitive and attractive to a wide consumer base.
+<br><br>
+
+#### **Final Word**
+
+In conclusion, Portugal’s stable economy, coupled with shifting consumer preferences toward healthier, sustainable, and innovative products, offers substantial growth potential for Vieira de Castro. By embracing these trends—especially in innovation, sustainability, and market diversification—the company is well-positioned to thrive in an increasingly dynamic sweet snack sector, ensuring long-term success.
 
 ### **Sitography**
 
-filler
+####
 
-sitography:
-https://www.geeksforgeeks.org/if-else-if-statement-in-r/
+**Websites Used**:
 
+<div style="text-align: left;">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- "Advertising and Marketing." Unilever, Unilever PLC, 18 Apr. 2024, <a href="https://www.unilever.com/sustainability/responsible-business/advertising-and-marketing/">www.unilever.com/sustainability/responsible-business/advertising-and-marketing/</a>. 
+- "Confectionery - Portugal: Statista Market Forecast." Statista, <a href="https://www.statista.com/outlook/cmo/food/confectionery-snacks/confectionery/portugal?currency=EUR#demographics">www.statista.com/outlook/cmo/food/confectionery-snacks/confectionery/portugal?currency=EUR#demographics</a>. Accessed 11 Nov. 2024. 
+- "Consumer price index" [dataset]. International Monetary Fund (via World Bank), “World Development Indicators” [original data]. Retrieved November 11, 2024 from <a href="https://ourworldindata.org/grapher/consumer-price-index">https://ourworldindata.org/grapher/consumer-price-index</a> 
+- "Daily supply of calories per person" [dataset]. Food and Agriculture Organization of the United Nations, "Food Balances: Food Balances (-2013, old methodology and population)"; Food and Agriculture Organization of the United Nations, "Food Balances: Food Balances (2010-)"; Harris et al., "How Many Calories? Food Availability in England and Wales in the Eighteenth and Nineteenth Centuries"; Floud et al., "The Changing Body"; Jonsson, "Changes in food consumption in Iceland, 1770-1940"; Grigg, "The nutritional transition in Western Europe"; Fogel, "The Escape from Hunger and Premature Death"; Food and Agriculture Organization of the United Nations, "The State of Food and Agriculture 2000"; Food and Agriculture Organization of the United Nations, "The State of Food and Agriculture 1949"; USDA Economic Research Service (ERS), "U.S. food supply: Nutrients and other food components, per capita per day" [original data]. Retrieved November 11, 2024 from <a href="https://ourworldindata.org/grapher/daily-per-capita-caloric-supply">https://ourworldindata.org/grapher/daily-per-capita-caloric-supply</a> 
+- "Eurostat Databases." Language Selection, <a href="https://ec.europa.eu/eurostat/databrowser/view/bd_9eg_l_form_r2/default/table?lang=en&category=bsd.bd.bd_h">ec.europa.eu/eurostat/databrowser/view/bd_9eg_l_form_r2/default/table?lang=en&category=bsd.bd.bd_h</a>. Accessed 24 Nov. 2024.
+- "Eurostat Databases." Language Selection, <a href="https://ec.europa.eu/eurostat/databrowser/view/bd_l_form/default/table?lang=en&category=bsd.bd">ec.europa.eu/eurostat/databrowser/view/bd_l_form/default/table?lang=en&category=bsd.bd</a>. Accessed 24 Nov. 2024.
+- "Eurostat Industry Database." Database - Eurostat, <a href="https://ec.europa.eu/eurostat/web/business-demography/database">ec.europa.eu/eurostat/web/business-demography/database</a>. Accessed 15 Nov. 2024.
+- "GDP per capita – World Bank – In constant 2017 international $." World Bank, “World Bank World Development Indicators” [original data]. Retrieved November 11, 2024 from <a href="https://ourworldindata.org/grapher/gdp-per-capita-worldbank">https://ourworldindata.org/grapher/gdp-per-capita-worldbank</a> 
+- "Human Development Index" [dataset]. UNDP, Human Development Report, “Human Development Report 2023-2024” [original data]. Retrieved November 11, 2024 from <a href="https://ourworldindata.org/grapher/human-development-index">https://ourworldindata.org/grapher/human-development-index</a> 
+- "Income for Being ‘Middle Class’ in Portugal Set at €688 per Month." The Portugal News, 21 Jan. 2024, <a href="https://www.theportugalnews.com/news/2024-01-21/income-for-being-middle-class-in-portugal-set-at-688-per-month/85282">www.theportugalnews.com/news/2024-01-21/income-for-being-middle-class-in-portugal-set-at-688-per-month/85282</a>. 
+- "Key Industries." AICEP, Republica Portuguesa, <a href="https://www.portugalglobal.pt/en/investment/key-industries/">www.portugalglobal.pt/en/investment/key-industries/</a>. Accessed 11 Nov. 2024. 
+- "Life expectancy at birth – Various sources – period tables" [dataset]. Human Mortality Database, “Human Mortality Database”; United Nations, “World Population Prospects 2022”; United Nations, “World Population Prospects”; Zijdeman et al., “Life Expectancy at birth 2”; James C. Riley, “Estimates of Regional and Global Life Expectancy, 1800-2001” [original data]. Retrieved November 12, 2024 from <a href="https://ourworldindata.org/grapher/life-expectancy">https://ourworldindata.org/grapher/life-expectancy</a> 
+- "More Sustainable Ingredients: Mondelēz International, Inc.." More Sustainable Ingredients | Mondelēz International, Inc., <a href="https://www.mondelezinternational.com/snacking-made-right/sustainable-ingredients/">www.mondelezinternational.com/snacking-made-right/sustainable-ingredients/</a>. Accessed 12 Nov. 2024. 
+- "Population" [dataset]. PBL Netherlands Environmental Assessment Agency, “History Database of the Global Environment 3.3”; Gapminder, “Population v7”; United Nations, “World Population Prospects”; Gapminder, “Systema Globalis” [original data]. Retrieved November 11, 2024 from <a href="https://ourworldindata.org/grapher/population">https://ourworldindata.org/grapher/population</a> 
+- "Population density" [dataset]. PBL Netherlands Environmental Assessment Agency, “History Database of the Global Environment 3.3”; Gapminder, “Population v7”; United Nations, “World Population Prospects”; Gapminder, “Systema Globalis”; Food and Agriculture Organization of the United Nations, “Land, Inputs and Sustainability: Land Use” [original data]. Retrieved November 12, 2024 from <a href="https://ourworldindata.org/grapher/population-density">https://ourworldindata.org/grapher/population-density</a> 
+- "Snack Food - Portugal: Statista Market Forecast." Statista, <a href="https://www.statista.com/outlook/cmo/food/confectionery-snacks/snack-food/portugal#demographics">www.statista.com/outlook/cmo/food/confectionery-snacks/snack-food/portugal#demographics</a>. Accessed 11 Nov. 2024. 
+- "Snack Food - Portugal: Statista Market Forecast." Statista, <a href="https://www.statista.com/outlook/cmo/food/confectionery-snacks/snack-food/portugal?currency=EUR#revenue">www.statista.com/outlook/cmo/food/confectionery-snacks/snack-food/portugal?currency=EUR#revenue</a>. Accessed 11 Nov. 2024. 
+- "Staff, EasyBib." EasyBib - Citation Website, Chegg, 1 Jan. 2024, <a href="https://www.easybib.com/">www.easybib.com/</a>. 
+- "Statistics Portugal." Statistics Portugal - Web Portal, Sistema Estatistico Nacional; Sistema Estatistico Europeu, <a href="https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_inst_missao">www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_inst_missao</a>. Accessed 11 Nov. 2024. 
+- "Structural Business Factors." Database - Eurostat, <a href="https://ec.europa.eu/eurostat/web/structural-business-statistics/database">ec.europa.eu/eurostat/web/structural-business-statistics/database</a>. Accessed 24 Nov. 2024.
+- "The Statistics Portal." Statista, Università di Trento, <a href="https://www.statista.com/markets/">www.statista.com/markets/</a>. Accessed 11 Nov. 2024. 
+- "Unilever Reveals Influencers Can Switch People on to Sustainable Living." Unilever, Unilever PLC, 25 Oct. 2024, <a href="https://www.unilever.com/news/press-and-media/press-releases/2023/unilever-reveals-influencers-can-switch-people-on-to-sustainable-living/">www.unilever.com/news/press-and-media/press-releases/2023/unilever-reveals-influencers-can-switch-people-on-to-sustainable-living/</a> 
+- "Why the Split?" WK Kellogg Co, <a href="https://www.wkkellogg.com/en-us/who-we-are/our-story/why-the-split.html">www.wkkellogg.com/en-us/who-we-are/our-story/why-the-split.html</a>. Accessed 12 Nov. 2024. 
+- "World Bank." World Bank Open Data, University of Oxford, <a href="https://data.worldbank.org/country/portugal">data.worldbank.org/country/portugal</a>. Accessed 11 Nov. 2024.
 
 
+</div>
 
-
-# Graph Tester
-
-## Graph Tester
-
-###
-
-```{r TESTER}
-
-```
-
+####
