@@ -1148,13 +1148,13 @@ shinyApp(ui = economics_graph_ui, server = economics_graph_server)
   
 ### **Unemployment Rate**
 
-- Stable Trend (pre-2008): Unemployment rate consistently between 5% and 10%.
+- Stable Trend (pre-2008): Unemployment rate consistently between 3-4% and 10%.
 - Impact of the 2008-2014 Financial Crisis:
   - Unemployment surged to 16%, then returned to the 5%-10% range after the crisis.
 - Global Pandemic Impact:
   - Unemployment saw a similar spike during the pandemic but later stabilized.
 - Recent Trends:
-  - Builing rebound in labour participation, signaling recovery and growing confidence in the job market.
+  - Building rebound in labour participation, signaling recovery and growing confidence in the job market.
 
 ### **Inflation Rate**
 
@@ -2427,7 +2427,7 @@ shinyApp(ui = demand_graph_ui, server = demand_graph_server)
 #### **Product Market**
 
 - Portugal’s snack market in 2024 has been polarized between health-conscious products and indulgent treats.
-- Vieira de Castro has introduced the CLabel+ (“clean label”) project, focusing on wellness with products like no-sugar, lactose-free, and fibre-rich options.
+- Vieira de Castro plays a role in the CLabel+ (“clean label”) project, focusing on wellness with products like no-sugar, lactose-free, and fibre-rich options.
   - It offers premium, affordable snacks priced under €7.50 to cater to consumer demand for indulgence and affordability.
 - Strong trend towards eco-friendly practices, with Vieira de Castro adopting more environmentally friendly packaging.
 - Despite economic caution, the snack sector (biscuits, almonds, chocolates) continues to perform well, with positive growth in the sweet biscuits segment.
@@ -2470,9 +2470,8 @@ shinyApp(ui = demand_graph_ui, server = demand_graph_server)
 - Internationally, Vieira de Castro operates through a subsidiary in Jordan and works with resellers in Brazil and the US.
 - The product line remains largely unchanged in international markets.
 
-#### **Competitiors**
+#### **Competitors**
 
-- Vieira de Castro dominates in the Sweet Biscuits, Snack Bars, Fruit Snacks, and Confectionery sectors.
 - Faces competition from international brands like Mondelez (Oreo, Milka), Ferrero (Kinder, Ferrero Rocher), and Nestlé (Kit Kat), which have strong brand recognition     and extensive distribution networks.
 - Competes locally with Portuguese companies like Imperial and Lusiteca in the sweet biscuits and confectionery categories.
 - Vieira de Castro holds a modest 1.0% market share in Portugal, particularly strong in sweet biscuits and snack bars, competing with Mondelez's sub-brands.
