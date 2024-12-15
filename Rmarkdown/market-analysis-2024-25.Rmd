@@ -442,7 +442,15 @@ clean_life_expectancy <-
   hchart("line", hcaes(`Year`, `Life Expectancy`)) %>% 
   hc_title(text = "Portuguese Life Expectancy") %>% 
   lnplot_custom(.) %>% 
-  hc_yAxis(title = list(text = "<b>Life Expectancy  [yrs]</b>", align = "middle")) %>% 
+  hc_yAxis(
+    title = list(text = "<b>Life Expectancy  [yrs]</b>", align = "middle"), 
+    labels = list(
+                  formatter = JS("function() {
+                      if (this.value > -1000) {
+                        return (this.value) + ' yrs';
+                      }
+                    }")
+                  )) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   hc_tooltip(., 
        headerFormat = "",
@@ -480,7 +488,14 @@ clean_obesity_rate <-
            Prevalence.of.obesity.among.adults..BMI....30..crude.estimate........Sex..both.sexes...Age.group..18...years) %>% 
   hchart("line", hcaes(`Year`, `Overweight Share of Adults`)) %>% 
   hc_title(text = "Portuguese Obesity Rate") %>% 
-  hc_yAxis(title = list(text = "<b>Obesity Rate [%]</b>", align = "middle")) %>% 
+  hc_yAxis(title = list(text = "<b>Obesity Rate [%]</b>", align = "middle"),
+           labels = list(
+                      formatter = JS("function() {
+                          if (this.value > -1000) {
+                            return (this.value) + '%';
+                          }
+                        }")
+                      )) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
   hc_tooltip(., 
@@ -1026,14 +1041,7 @@ economics_graph_server <- function(input, output){
                                   }")
                                 )
                     ) %>%
-            hc_xAxis(title=list(text="<b>Year</b>", align="middle"),
-                     labels = list(
-                                formatter = JS("function() {
-                                    if (this.value) {
-                                      return ((this.value/4)+1995);
-                                    }
-                                  }")
-                                )) %>%
+            hc_xAxis(title=list(text="<b>Year [Quarters]</b>", align="middle")) %>%
             hc_tooltip(.,
                  headerFormat = "",
                  pointFormat =
@@ -1056,14 +1064,7 @@ economics_graph_server <- function(input, output){
                           }
                         }")
                       )) %>%
-            hc_xAxis(title=list(text="<b>Year</b>", align="middle"),
-                     labels = list(
-                                formatter = JS("function() {
-                                    if (this.value) {
-                                      return ((this.value/4)+1995);
-                                    }
-                                  }")
-                                )) %>%
+            hc_xAxis(title=list(text="<b>Year [Quarters]</b>", align="middle")) %>%
             hc_tooltip(.,
                  headerFormat = "",
                  pointFormat =
@@ -1103,7 +1104,7 @@ economics_graph_server <- function(input, output){
             hc_yAxis(title=list(text="<b>Inflation Rate [%]</b>", align="middle"),
                      labels = list(
                       formatter = JS("function() {
-                          if (this.value) {
+                          if (this.value > -1000) {
                             return (this.value) + '%';
                           }
                         }")
