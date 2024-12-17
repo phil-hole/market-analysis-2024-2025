@@ -2306,7 +2306,6 @@ demand_graph_server <- function(input, output){
                 pointFormat = "<b>Volume:</b> {point.total_vol:.f} k tonnes<br>"
                 ) 
           ) %>% 
-          
           hc_add_series(
             data = temp[[2]],
             type = "line",
