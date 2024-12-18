@@ -1067,7 +1067,7 @@ economics_graph_server <- function(input, output){
             hc_yAxis(title=list(text="<b>Real GDP Growth Rate [%]</b>", align="middle"),
                      labels = list(
                       formatter = JS("function() {
-                          if (this.value) {
+                          if (this.value > -1000) {
                             return (this.value) + '%';
                           }
                         }")
