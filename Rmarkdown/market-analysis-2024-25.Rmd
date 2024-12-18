@@ -631,7 +631,15 @@ clean_poverty_percentage <-
   rename(`Poverty Ratio` = Poverty.headcount.ratio.at.national.poverty.lines....of.population.) %>% 
   hchart("line", hcaes(`Year`, `Poverty Ratio`)) %>% 
   hc_title(text = "Portuguese Relative Population Poverty Percentage [%]") %>% 
-  hc_yAxis(title = list(text = "<b>National Poverty Headcount Ratio [%]</b>", align = "middle")) %>% 
+  hc_yAxis(title = list(text = "<b>National Poverty Headcount Ratio [%]</b>", align = "middle"),
+           labels = list(
+             formatter = JS("function() {
+                          if (this.value > -1000) {
+                            return (this.value) + '%';
+                          }
+                        }")
+            )
+           ) %>% 
   hc_xAxis(title = list(text = "<b>Year</b>", align = "middle")) %>% 
   lnplot_custom(.) %>% 
   hc_tooltip(., 
