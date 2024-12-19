@@ -1,14 +1,34 @@
 ---
 title: "<b>Portugal Market Analysis</b>"
-output: 
+output:
   flexdashboard::flex_dashboard:
     source_code: embed
     orientation: columns
     vertical_layout: fill
     theme: simplex
-editor_options: 
+editor_options:
   chunk_output_type: console
 runtime: shiny
+resource_files:
+- Datasets/portugal_company_shares.xlsx
+- Datasets/portugal_consumer_price_index.csv
+- Datasets/portugal_daily_caloric_supply.csv
+- Datasets/portugal_dsets_estat.xlsx
+- Datasets/portugal_gdp_constant.csv
+- Datasets/portugal_gdp_per_capita.csv
+- Datasets/portugal_hdi.csv
+- Datasets/portugal_inflation.csv
+- Datasets/portugal_life_expectancy.csv
+- Datasets/portugal_migrant_stock.csv
+- Datasets/portugal_overweight_adults.csv
+- Datasets/portugal_population.csv
+- Datasets/portugal_population_density.csv
+- Datasets/portugal_population_growth_rate.csv
+- Datasets/portugal_population_poverty.csv
+- Datasets/portugal_real_gdp.csv
+- Datasets/portugal_retail_volume_price.xlsx
+- Datasets/portugal_snack_subcategories.xlsx
+- Datasets/portugal_unemployment_rate.csv
 ---
 <!-- theme alternatives: "cerulean",  "journal", "readable", "simplex", "united", "yeti" -->
 
@@ -135,8 +155,8 @@ barplot_custom <- function(x){
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 
 #DATA IMPORTING
-#when downloading the file, the working directory should automatically set to the path where the Markdown file is saved. if that does not occur, copy the Markdown from the dropdown menu between the "" and run the single line of code.
-setwd("C:/Users/busop/All Files - ORIGINAL FILES OF DESKTOP LINKS/Github/market-analysis-2024-2025/Rmarkdown")
+#when downloading the file, the working directory should automatically set to the path where the Markdown file is saved. if that does not occur, copy the Markdown path from the dropdown menu between the "" and run the single line of code.
+# setwd("C:/Users/busop/All Files - ORIGINAL FILES OF DESKTOP LINKS/Github/market-analysis-2024-2025/Rmarkdown")
 
 dsets <- list.files(path="./Datasets", pattern = "*.csv", full.names = FALSE)   
 #vector with file names
